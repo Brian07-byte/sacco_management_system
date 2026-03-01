@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header-card">
+        <div class="profile-avatar">
+            {{ member.user.username|slice:":1"|upper }}
+        </div>
+        <div class="profile-title-area">
+            <h1>{{ member.user.get_full_name|default:member.user.username }}</h1>
+            <div class="profile-badges">
+                <span class="badge badge-member">{{ member.member_number }}</span>
+                <span class="badge badge-status-{{ member.status|lower }}">{{ member.status }}</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'members:edit_profile' %}" class="btn-outline-sm">
+                <i class="fa-solid fa-user-pen"></i> Edit Profile
+            </a>
+        </div>
+    </div>
+
+    <div class="profile-grid">
+        <div class="info-column">
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fa-solid fa-address-card"></i>
+                    <h3>Personal Information</h3>
+                </div>
+                <div class="info-body">
+                    <div class="info-row">
+                        <span class="label">National ID</span>
+                        <span class="value">{{ member.national_id|default:"(Not set)" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Email Address</span>
+                        <span class="value">{{ member.user.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Phone Number</span>
+                        <span class="value">{{ member.user.phone_number|default:"-" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Gender</span>
+                        <span class="value">{{ member.gender|title|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <h3>Location & Address</h3>
+                </div>
+                <div class="info-body">
+                    <div class="info-row">
+                        <span class="label">Residential Address</span>
+                        <span class="value">{{ member.address|default:"-" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Town / City</span>
+                        <span class="value">{{ member.town|default:"-" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">County</span>
+                        <span class="value">{{ member.county|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-column">
+            <div class="info-card highlight-card">
+                <div class="card-header">
+                    <i class="fa-solid fa-users-viewfinder"></i>
+                    <h3>Next of Kin Details</h3>
+                </div>
+                <div class="info-body">
+                    <div class="info-row">
+                        <span class="label">Full Name</span>
+                        <span class="value">{{ member.next_of_kin_name|default:"-" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Relationship</span>
+                        <span class="value">{{ member.next_of_kin_relationship|default:"-" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Contact Phone</span>
+                        <span class="value">{{ member.next_of_kin_phone|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if not member.national_id %}
+            <div class="alert-onboarding">
+                <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="alert-text">
+                    <h4>Profile Incomplete</h4>
+                    <p>Activate your membership by completing your profile.</p>
+                    <a href="{% url 'members:complete_profile' %}" class="btn-auth-success">Complete Now</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

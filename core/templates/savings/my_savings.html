@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Savings | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --sacco-navy: #1e3a8a;
+        --sacco-green: #10b981;
+        --text-main: #1e293b;
+        --text-light: #64748b;
+        --bg-glass: rgba(255, 255, 255, 0.9);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dashboard-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* --- Header --- */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .header-text h1 { 
+        color: var(--sacco-navy); 
+        margin: 0; 
+        font-size: 2rem; 
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+    .header-text p { color: var(--text-light); margin: 4px 0 0; font-size: 0.95rem; }
+    
+    .header-date { 
+        background: #ecfdf5; 
+        padding: 8px 16px; 
+        border-radius: 12px;
+        font-size: 0.85rem; 
+        color: var(--sacco-green); 
+        font-weight: 700; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px;
+        border: 1px solid #d1fae5;
+    }
+
+    /* --- Hero Balance Card --- */
+    .balance-card {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 3rem;
+        border-radius: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.25);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .balance-card::after {
+        content: "";
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        top: -100px;
+        right: -50px;
+        border-radius: 50%;
+    }
+
+    .balance-label { font-size: 1rem; opacity: 0.9; font-weight: 500; }
+    .balance-amount { font-size: 3.5rem; margin: 0.5rem 0; font-weight: 800; letter-spacing: -1px; }
+    
+    .balance-footer { display: flex; gap: 15px; margin-top: 1.5rem; }
+    .status-badge { 
+        background: rgba(255, 255, 255, 0.2); 
+        backdrop-filter: blur(4px);
+        padding: 6px 14px; 
+        border-radius: 100px; 
+        font-size: 0.75rem; 
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* --- Summary Grid --- */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .summary-tile {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        border: 1px solid #f1f5f9;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .summary-tile:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+
+    .s-label { font-size: 0.7rem; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .s-value { font-size: 1.3rem; font-weight: 800; margin: 8px 0; color: var(--sacco-navy); }
+    .s-sub { font-size: 0.75rem; color: #94a3b8; line-height: 1.4; }
+
+    .s-in { border-top: 4px solid #10b981; }
+    .s-out { border-top: 4px solid #ef4444; }
+    .s-fee { border-top: 4px solid #f59e0b; }
+    .s-pending { border-top: 4px solid #6366f1; }
+
+    /* --- Action Grid --- */
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 3rem;
+    }
+
+    .action-tile {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 20px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid #f1f5f9;
+        transition: var(--transition);
+    }
+
+    .action-tile:hover {
+        background: var(--sacco-navy);
+        border-color: var(--sacco-navy);
+    }
+
+    .action-tile:hover .tile-text h3, 
+    .action-tile:hover .tile-text p,
+    .action-tile:hover .arrow { color: white; }
+
+    .tile-icon { 
+        width: 48px; height: 48px; border-radius: 14px; 
+        display: flex; align-items: center; justify-content: center; 
+        font-size: 1.1rem; flex-shrink: 0;
+    }
+    
+    .icon-blue { background: #eff6ff; color: #3b82f6; }
+    .icon-green { background: #ecfdf5; color: #10b981; }
+    .icon-red { background: #fff1f2; color: #e11d48; }
+    .icon-gold { background: #fffbeb; color: #d97706; }
+
+    .tile-text h3 { margin: 0; font-size: 0.95rem; color: var(--sacco-navy); font-weight: 700; }
+    .tile-text p { margin: 2px 0 0; font-size: 0.75rem; color: var(--text-light); }
+    .arrow { margin-left: auto; color: #cbd5e1; transition: var(--transition); }
+
+    /* --- Details Card --- */
+    .details-card {
+        background: #f8fafc;
+        padding: 2rem;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .details-card h3 { font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--sacco-navy); display: flex; align-items: center; gap: 10px; }
+    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .detail-item { display: flex; flex-direction: column; gap: 6px; }
+    .d-label { font-size: 0.7rem; color: var(--text-light); font-weight: 700; text-transform: uppercase; }
+    .d-value { font-size: 1rem; font-weight: 600; color: var(--sacco-navy); }
+
+    @media (max-width: 768px) {
+        .balance-amount { font-size: 2.5rem; }
+        .balance-card { padding: 2rem; }
+        .header-text h1 { font-size: 1.5rem; }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-text">
+            <h1>Savings Overview</h1>
+            <p>Member ID: <strong>{{ account.member.member_number }}</strong></p>
+        </div>
+        <div class="header-date">
+            <i class="fa-solid fa-calendar-day"></i>
+            <span>{% now "jS F Y" %}</span>
+        </div>
+    </div>
+
+    <div class="balance-card">
+        <div class="balance-content">
+            <span class="balance-label">Available Balance</span>
+            <h2 class="balance-amount">KES {{ account.balance }}</h2>
+            <div class="balance-footer">
+                <span class="status-badge">
+                    <i class="fa-solid fa-shield-check"></i> Active Account
+                </span>
+                <span class="status-badge">
+                    <i class="fa-solid fa-chart-line"></i> 2.5% p.a Interest
+                </span>
+            </div>
+        </div>
+        <div class="balance-icon" style="font-size: 5rem; opacity: 0.1; transform: rotate(-10deg);">
+            <i class="fa-solid fa-wallet"></i>
+        </div>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-tile s-in">
+            <div class="s-label">Total Deposits</div>
+            <div class="s-value">KES {{ total_deposits|default:"0.00" }}</div>
+            <div class="s-sub">Lifetime savings credited to this account.</div>
+        </div>
+
+        <div class="summary-tile s-out">
+            <div class="s-label">Total Withdrawn</div>
+            <div class="s-value">KES {{ total_withdrawals|default:"0.00" }}</div>
+            <div class="s-sub">Processed withdrawal requests.</div>
+        </div>
+
+        <div class="summary-tile s-fee">
+            <div class="s-label">Transaction Fees</div>
+            <div class="s-value">KES {{ total_fees|default:"0.00" }}</div>
+            <div class="s-sub">Total service charges applied.</div>
+        </div>
+
+        <div class="summary-tile s-pending">
+            <div class="s-label">In Review</div>
+            <div class="s-value">{{ pending_count|default:"0" }} Requests</div>
+            <div class="s-sub">Pending verification by staff.</div>
+        </div>
+    </div>
+
+    <div class="action-grid">
+        <a href="{% url 'savings:my_transactions' %}" class="action-tile">
+            <div class="tile-icon icon-blue"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="tile-text">
+                <h3>History</h3>
+                <p>Transactions & receipts</p>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+
+        <a href="{% url 'savings:member_deposit' %}" class="action-tile">
+            <div class="tile-icon icon-green"><i class="fa-solid fa-plus"></i></div>
+            <div class="tile-text">
+                <h3>Deposit</h3>
+                <p>Add funds to savings</p>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+
+        <a href="{% url 'savings:member_withdrawal' %}" class="action-tile">
+            <div class="tile-icon icon-red"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+            <div class="tile-text">
+                <h3>Withdraw</h3>
+                <p>Transfer funds out</p>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+
+        <a href="#" class="action-tile">
+            <div class="tile-icon icon-gold"><i class="fa-solid fa-file-pdf"></i></div>
+            <div class="tile-text">
+                <h3>Statements</h3>
+                <p>Monthly PDF reports</p>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+    </div>
+
+    <div class="details-card">
+        <h3><i class="fa-solid fa-circle-info"></i> Account Information</h3>
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="d-label">Virtual Account ID</span>
+                <span class="d-value">SAV-{{ account.member.member_number|upper }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="d-label">Target Monthly Saving</span>
+                <span class="d-value">KES 2,000.00</span>
+            </div>
+            <div class="detail-item">
+                <span class="d-label">Last Activity</span>
+                <span class="d-value">
+                    {% if last_transaction %}
+                        {{ last_transaction.created_at|date:"d M Y, H:i" }}
+                    {% else %}
+                        No recent activity
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

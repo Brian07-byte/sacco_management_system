@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}My Security Activity | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>My Security Activity</h1>
+      <p>Only your login/logout history is shown here.</p>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Action</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in logs %}
+          <tr>
+            <td>{{ l.created_at|date:"Y-m-d H:i" }}</td>
+            <td><strong>{{ l.action }}</strong></td>
+            <td><code>{{ l.ip_address|default:"-" }}</code></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">No security activity found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

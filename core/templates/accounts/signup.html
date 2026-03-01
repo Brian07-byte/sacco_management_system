@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign Up | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <a href="{% url 'core:landing' %}" class="back-home">
+        <i class="fa-solid fa-house-chimney"></i>
+        <span>Return Home</span>
+    </a>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h2>Join Pamoja</h2>
+            <p>Become a member and start your growth journey.</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Action Required</span>
+            </div>
+            <ul class="error-list">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="input-with-icon">
+                        {% if 'email' in field.name.lower %}
+                            <i class="fa-solid fa-envelope"></i>
+                        {% elif 'password' in field.name.lower %}
+                            <i class="fa-solid fa-key"></i>
+                        {% elif 'user' in field.name.lower %}
+                            <i class="fa-solid fa-user-tag"></i>
+                        {% else %}
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        {% endif %}
+                        {{ field }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button class="btn-auth-success" type="submit">
+                Create Account <i class="fa-solid fa-circle-check"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already a member? <a href="{% url 'accounts:login' %}">Sign In here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

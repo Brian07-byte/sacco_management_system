@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Settings | Pamoja SACCO{% endblock %}
+{% block content %}
+<style>
+    /* Layout & Header */
+.list-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.list-header {
+    margin-bottom: 2.5rem;
+}
+
+.header-main h1 {
+    font-size: 2.25rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.header-main p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* Action Grid Styling */
+.action-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.action-tile {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    padding: 20px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.action-tile:hover {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Icons */
+.tile-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-right: 20px;
+}
+
+.icon-green { background: #dcfce7; color: #16a34a; }
+.icon-blue  { background: #dbeafe; color: #2563eb; }
+.icon-gold  { background: #fef9c3; color: #ca8a04; }
+
+/* Text Content */
+.tile-text h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.tile-text p {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* Navigation Arrow */
+.arrow {
+    margin-left: auto;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.action-tile:hover .arrow {
+    color: #3b82f6;
+}
+</style>
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Settings</h1>
+      <p>Products & policies (members view only, managers can update).</p>
+    </div>
+  </div>
+
+  <div class="action-grid">
+    <a class="action-tile" href="{% url 'settingsapp:savings_products' %}">
+      <div class="tile-icon icon-green"><i class="fa-solid fa-piggy-bank"></i></div>
+      <div class="tile-text"><h3>Savings Products</h3><p>View SACCO savings plans</p></div>
+      <i class="fa-solid fa-chevron-right arrow"></i>
+    </a>
+
+    <a class="action-tile" href="{% url 'settingsapp:loan_products' %}">
+      <div class="tile-icon icon-blue"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+      <div class="tile-text"><h3>Loan Products</h3><p>View available loan types</p></div>
+      <i class="fa-solid fa-chevron-right arrow"></i>
+    </a>
+
+    <a class="action-tile" href="{% url 'settingsapp:fees' %}">
+      <div class="tile-icon icon-gold"><i class="fa-solid fa-coins"></i></div>
+      <div class="tile-text"><h3>Fees & Charges</h3><p>Membership & transaction charges</p></div>
+      <i class="fa-solid fa-chevron-right arrow"></i>
+    </a>
+  </div>
+</div>
+{% endblock %}

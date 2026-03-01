@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="sacco-dashboard-wrapper py-5">
+    <div class="container">
+        
+        <div class="row mb-5 align-items-end">
+            <div class="col-lg-7">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-indigo fw-medium">Operations</a></li>
+                        <li class="breadcrumb-item active text-muted">Approvals</li>
+                    </ol>
+                </nav>
+                <h1 class="display-6 fw-bold text-slate-900 mb-1">Repayment Pipeline</h1>
+                <p class="text-slate-500 fs-5 mb-0">Authorize and reconcile incoming member loan repayments.</p>
+            </div>
+            <div class="col-lg-5 text-lg-end mt-4 mt-lg-0">
+                <div class="btn-group shadow-sm">
+                    <a href="{% url 'loans:record_repayment' %}" class="btn btn-indigo px-4 py-2">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Manual Entry
+                    </a>
+                    <button class="btn btn-white border px-3"><i class="bi bi-download"></i> Export</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card metric-card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-shape bg-amber-100 text-amber-600">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <span class="ms-3 text-slate-500 fw-semibold small text-uppercase">Pending Review</span>
+                        </div>
+                        <div class="d-flex align-items-baseline">
+                            <h2 class="fw-bold text-slate-900 mb-0">{{ pending_reps|length }}</h2>
+                            <span class="ms-2 text-slate-400 small">Transactions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card metric-card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-shape bg-indigo-50 text-indigo">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                            <span class="ms-3 text-slate-500 fw-semibold small text-uppercase">Total Queue Value</span>
+                        </div>
+                        <div class="d-flex align-items-baseline">
+                            <h2 class="fw-bold text-slate-900 mb-0">KES {{ total_pending_amount|default:"0.00" }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card metric-card border-0 shadow-sm h-100 bg-indigo text-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-shape bg-white bg-opacity-25 text-white">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <span class="ms-3 fw-semibold small text-uppercase">Efficiency</span>
+                        </div>
+                        <p class="small mb-0 opacity-75">Aim for < 24hr reconciliation for member satisfaction.</p>
+                    </div>
+                </div>
+            </div>
+        </div> <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-header bg-white py-4 border-bottom border-slate-100">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0 fw-bold text-slate-800">Review Queue</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-slate-50 border-end-0 text-slate-400"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control bg-slate-50 border-start-0 ps-0" placeholder="Filter by Member or Ref...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="ps-4 py-3 text-slate-500 fw-bold small text-uppercase" style="width: 30%;">Member / Account</th>
+                            <th class="py-3 text-slate-500 fw-bold small text-uppercase">Value</th>
+                            <th class="py-3 text-slate-500 fw-bold small text-uppercase">Reference</th>
+                            <th class="py-3 text-slate-500 fw-bold small text-uppercase">Status</th>
+                            <th class="pe-4 py-3 text-end text-slate-500 fw-bold small text-uppercase">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for rep in pending_reps %}
+                        <tr>
+                            <td class="ps-4 py-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-box me-3 text-indigo bg-indigo-50">
+                                        {{ rep.loan.member.user.get_full_name|slice:":1" }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-slate-900 mb-0">{{ rep.loan.member.user.get_full_name }}</div>
+                                        <div class="text-indigo small fw-medium">{{ rep.loan.member.member_number }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4">
+                                <div class="text-slate-900 fw-bold">KES {{ rep.amount }}</div>
+                                <div class="text-slate-400 extra-small">{{ rep.created_at|date:"M d, Y" }} • {{ rep.created_at|date:"H:i" }}</div>
+                            </td>
+                            <td class="py-4">
+                                <span class="mono-ref text-slate-600 bg-slate-100 px-2 py-1 rounded">
+                                    {{ rep.reference }}
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <span class="badge-dot">
+                                    <span class="dot bg-amber-500"></span>
+                                    Verification
+                                </span>
+                            </td>
+                            <td class="pe-4 py-4 text-end">
+                                <a href="{% url 'loans:approve_repayment' rep.pk %}" class="btn btn-action-pill shadow-sm">
+                                    Review <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-5 text-center">
+                                <div class="empty-state py-5">
+                                    <i class="bi bi-shield-check display-1 text-slate-200"></i>
+                                    <h5 class="text-slate-800 fw-bold mt-3">Queue is Empty</h5>
+                                    <p class="text-slate-500">All member repayments have been reconciled.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+/* ================================
+   Modern SACCO Dashboard Theme
+   ================================ */
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #0f172a;          /* slate-900 */
+  --muted: #64748b;         /* slate-500 */
+  --muted2:#94a3b8;         /* slate-400 */
+  --border:#e2e8f0;         /* slate-200 */
+  --soft:#f1f5f9;           /* slate-100 */
+  --soft2:#f8fafc;          /* slate-50 */
+
+  --indigo:#4f46e5;         /* indigo-600 */
+  --indigo-700:#4338ca;
+  --indigo-50:#eef2ff;
+
+  --amber:#f59e0b;          /* amber-500 */
+  --amber-100:#fef3c7;
+  --amber-700:#b45309;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
+  --shadow-md: 0 10px 25px rgba(15, 23, 42, .08);
+  --shadow-lg: 0 18px 50px rgba(15, 23, 42, .10);
+
+  --radius: 18px;
+}
+
+html, body{
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.sacco-dashboard-wrapper{
+  background:
+    radial-gradient(900px 300px at 20% -10%, rgba(79,70,229,.12), transparent 60%),
+    radial-gradient(700px 220px at 90% 0%, rgba(245,158,11,.10), transparent 55%),
+    var(--bg);
+}
+
+/* ----------------
+   Breadcrumb + Header
+   ---------------- */
+.breadcrumb{
+  background: transparent;
+}
+.breadcrumb-item a{
+  color: var(--indigo);
+}
+.breadcrumb-item.active{
+  color: var(--muted);
+}
+.display-6{
+  letter-spacing: -0.02em;
+}
+.text-slate-900{ color: var(--text) !important; }
+.text-slate-800{ color: #1e293b !important; }
+.text-slate-600{ color: #475569 !important; }
+.text-slate-500{ color: var(--muted) !important; }
+.text-slate-400{ color: var(--muted2) !important; }
+.text-indigo{ color: var(--indigo) !important; }
+.border-slate-100{ border-color: var(--soft) !important; }
+.bg-slate-50{ background: var(--soft2) !important; }
+.bg-slate-100{ background: var(--soft) !important; }
+
+/* ----------------
+   Buttons
+   ---------------- */
+.btn{
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.btn:hover{
+  transform: translateY(-1px);
+}
+
+.btn-indigo{
+  background: linear-gradient(180deg, var(--indigo), var(--indigo-700));
+  color: #fff !important;
+  border: 0;
+  box-shadow: 0 10px 20px rgba(79,70,229,.18);
+}
+.btn-indigo:hover{
+  box-shadow: 0 14px 30px rgba(79,70,229,.25);
+}
+
+.btn-white{
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border) !important;
+}
+.btn-white:hover{
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-action-pill{
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: .55rem 1rem;
+}
+.btn-action-pill:hover{
+  background: var(--indigo-50);
+  border-color: rgba(79,70,229,.25);
+  color: var(--indigo);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ----------------
+   Cards
+   ---------------- */
+.card{
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.metric-card{
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.metric-card:hover{
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+
+.card.shadow-lg{
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.card-header{
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+}
+
+/* ----------------
+   Icon shapes
+   ---------------- */
+.icon-shape{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+  font-size: 1.05rem;
+}
+.bg-amber-100{ background: var(--amber-100) !important; }
+.text-amber-600{ color: var(--amber) !important; }
+.bg-indigo-50{ background: var(--indigo-50) !important; }
+.bg-indigo{
+  background: linear-gradient(145deg, var(--indigo), var(--indigo-700)) !important;
+}
+
+/* ----------------
+   Search input
+   ---------------- */
+.input-group .input-group-text{
+  border-radius: 999px 0 0 999px;
+  border: 1px solid var(--border);
+}
+.input-group .form-control{
+  border-radius: 0 999px 999px 0;
+  border: 1px solid var(--border);
+  box-shadow: none !important;
+}
+.input-group .form-control:focus{
+  border-color: rgba(79,70,229,.35);
+  box-shadow: 0 0 0 4px rgba(79,70,229,.10) !important;
+  background: #fff !important;
+}
+
+/* ----------------
+   Table
+   ---------------- */
+.table-responsive{
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+.table{
+  margin: 0;
+}
+.table thead th{
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-top: none;
+  border-bottom: 1px solid var(--border);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background: var(--soft2);
+  white-space: nowrap;
+}
+.table tbody td{
+  border-top: 1px solid rgba(226,232,240,.75);
+  padding-top: 1.05rem;
+  padding-bottom: 1.05rem;
+}
+.table-hover tbody tr{
+  transition: background .15s ease;
+}
+.table-hover tbody tr:hover{
+  background: rgba(79,70,229,.04);
+}
+
+/* ----------------
+   Avatar
+   ---------------- */
+.avatar-box{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+/* ----------------
+   Reference pill
+   ---------------- */
+.mono-ref{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-weight: 700;
+  font-size: .82rem;
+  border: 1px solid rgba(148,163,184,.35);
+}
+
+/* ----------------
+   Badge dot (status)
+   ---------------- */
+.badge-dot{
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .4rem .7rem;
+  border-radius: 999px;
+  background: rgba(245,158,11,.10);
+  border: 1px solid rgba(245,158,11,.25);
+  color: var(--amber-700);
+  font-weight: 700;
+  font-size: .85rem;
+}
+.badge-dot .dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.bg-amber-500{ background: var(--amber) !important; }
+
+/* ----------------
+   Empty state
+   ---------------- */
+.empty-state{
+  max-width: 520px;
+  margin: 0 auto;
+}
+.empty-state i{
+  opacity: .25;
+}
+.empty-state h5{
+  letter-spacing: -0.01em;
+}
+
+/* ----------------
+   Small helpers
+   ---------------- */
+.extra-small{ font-size: 0.78rem; }
+.rounded-4{ border-radius: var(--radius) !important; }
+
+/* ----------------
+   Mobile polish
+   ---------------- */
+@media (max-width: 576px){
+  .display-6{ font-size: 1.8rem; }
+  .btn-group{ width: 100%; }
+  .btn-group .btn{ flex: 1; }
+}
+</style>
+</style>
+{% endblock %}

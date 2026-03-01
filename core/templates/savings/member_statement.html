@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Savings Statement | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    .statement-header { 
+        border-bottom: 2px solid var(--sacco-navy); 
+        padding-bottom: 1rem; 
+        margin-bottom: 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+    }
+    .member-info-card { 
+        background: #f8fafc; 
+        padding: 1.5rem; 
+        border-radius: 12px; 
+        margin-bottom: 2rem; 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+    }
+    .statement-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .statement-table th { background: #1e293b; color: white; padding: 12px; text-align: left; font-size: 0.8rem; }
+    .statement-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+    
+    .text-red { color: #dc2626; }
+    .text-green { color: #16a34a; }
+    .font-mono { font-family: 'Courier New', monospace; font-weight: 700; }
+
+    @media print {
+        .no-print { display: none !important; }
+        .statement-table th { background: #f1f5f9 !important; color: black !important; border: 1px solid #ddd; }
+        body { background: white; }
+    }
+</style>
+
+<div class="list-container" style="max-width: 1000px; margin: 2rem auto;">
+    
+    <div class="no-print" style="margin-bottom: 1rem; display: flex; justify-content: space-between;">
+        <a href="{% url 'savings:my' %}" style="text-decoration:none; color:#64748b;">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <button onclick="window.print()" class="btn-staff-primary" style="cursor:pointer; background:#1e293b; color:white; border:none; padding:8px 16px; border-radius:8px;">
+            <i class="fa-solid fa-print"></i> Download as PDF
+        </button>
+    </div>
+
+    <div class="statement-header">
+        <div>
+            <h2 style="margin:0; color:var(--sacco-navy);">PAMOJA SACCO SOCIETY</h2>
+            <p style="margin:2px 0; font-size:0.85rem; color:#64748b;">Official Savings Account Statement</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="margin:0; font-size:0.85rem;">Generated: {{ today|date:"d M Y" }}</p>
+            <p style="margin:0; font-size:0.85rem;">Reference: {{ account.id|stringformat:"05d" }}</p>
+        </div>
+    </div>
+
+    <div class="member-info-card">
+        <div>
+            <span style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Member Details</span>
+            <p style="margin:5px 0;"><strong>{{ account.member.user.get_full_name }}</strong></p>
+            <p style="margin:0; font-size:0.9rem;">Member No: {{ account.member.member_number }}</p>
+            <p style="margin:0; font-size:0.9rem;">ID No: {{ account.member.national_id }}</p>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Account Summary</span>
+            <p style="margin:5px 0; font-size:1.5rem;" class="font-mono">KES {{ account.balance }}</p>
+            <p style="margin:0; font-size:0.85rem; color:#16a34a;">Status: {{ account.member.status }}</p>
+        </div>
+    </div>
+
+    
+
+    <table class="statement-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description / Reference</th>
+                <th>Debit (Out)</th>
+                <th>Credit (In)</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in statement %}
+            <tr>
+                <td>{{ item.obj.created_at|date:"d/m/Y" }}</td>
+                <td>
+                    <div style="font-weight:600;">{{ item.obj.get_txn_type_display }}</div>
+                    <div style="font-size:0.7rem; color:#64748b;">Ref: {{ item.obj.reference }}</div>
+                </td>
+                <td class="text-red font-mono">
+                    {% if item.obj.txn_type == "WITHDRAWAL" %}
+                        -{{ item.obj.amount|add:item.obj.fee_amount }}
+                    {% else %}-{% endif %}
+                </td>
+                <td class="text-green font-mono">
+                    {% if item.obj.txn_type == "DEPOSIT" %}
+                        +{{ item.obj.amount|add:"-item.obj.membership_fee_amount" }}
+                    {% else %}-{% endif %}
+                </td>
+                <td class="font-mono" style="background: #f1f5f9;">KES {{ item.running_balance }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center; padding:3rem; color:#94a3b8;">No posted transactions found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 3rem; font-size: 0.75rem; color: #94a3b8; text-align: center; border-top: 1px dashed #cbd5e1; padding-top: 1rem;">
+        This is a computer-generated statement and does not require a signature. <br>
+        &copy; 2026 Pamoja SACCO Society Ltd.
+    </div>
+</div>
+{% endblock %}

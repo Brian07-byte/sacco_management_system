@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Savings Report | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    .report-filter-bar { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+    .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .report-card { background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .report-card span { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.025em; margin-bottom: 0.5rem; }
+    .report-card strong { font-size: 1.25rem; color: #1e293b; font-family: 'Monaco', 'Consolas', monospace; }
+    
+    .badge { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 10px; text-transform: uppercase; }
+    .badge-deposit { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-withdrawal { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    @media print {
+        .report-filter-bar, .nav-sidebar, .btn-staff-outline, .btn-staff-primary { display: none !important; }
+        .list-container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
+        .report-card { border: 1px solid #000; }
+    }
+</style>
+
+<div class="list-container" style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="margin:0; font-size: 1.75rem;">Savings & Revenue Report</h1>
+            <p style="color: #64748b; margin: 4px 0 0 0;">Financial audit for the selected period.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="?{{ request.GET.urlencode }}&export=true" class="btn-staff-outline" style="text-decoration: none; background: white; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0; color: #1e293b; font-weight: 600;">
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+            </a>
+            <button onclick="window.print()" class="btn-staff-primary" style="background: #1e293b; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight: 600;">
+                <i class="fa-solid fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <form class="report-filter-bar" method="GET">
+        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color: #475569; margin-bottom: 5px;">Member No.</label>
+                <input type="text" name="member" value="{{ member_query|default:'' }}" placeholder="MEM-001" style="width: 100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color: #475569; margin-bottom: 5px;">Start Date</label>
+                <input type="date" name="start_date" value="{{ start_date }}" style="width: 100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color: #475569; margin-bottom: 5px;">End Date</label>
+                <input type="date" name="end_date" value="{{ end_date }}" style="width: 100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
+            </div>
+            <button type="submit" style="height: 38px; background: #334155; color: white; border:none; padding: 0 20px; border-radius:6px; font-weight: 600; cursor: pointer;">Filter</button>
+            <a href="{% url 'savings:report' %}" style="font-size: 0.8rem; color: #ef4444; text-decoration: none; padding-bottom: 10px;">Reset</a>
+        </div>
+    </form>
+
+    <div class="report-grid">
+        <div class="report-card">
+            <span>Total Deposits</span>
+            <strong>KES {{ summary.total_deposits|default:"0.00"|floatformat:2 }}</strong>
+        </div>
+        <div class="report-card">
+            <span>Total Withdrawals</span>
+            <strong>KES {{ summary.total_withdrawals|default:"0.00"|floatformat:2 }}</strong>
+        </div>
+        <div class="report-card" style="border-top: 4px solid #f59e0b;">
+            <span>Revenue (Fees)</span>
+            <strong style="color: #b45309;">KES {{ summary.total_fees|default:"0.00"|floatformat:2 }}</strong>
+        </div>
+        
+    </div>
+
+    <div class="table-card" style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                    <th style="padding:15px; text-align:left; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Date</th>
+                    <th style="padding:15px; text-align:left; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Member</th>
+                    <th style="padding:15px; text-align:center; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Type</th>
+                    <th style="padding:15px; text-align:right; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Amount</th>
+                    <th style="padding:15px; text-align:right; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Fees</th>
+                    <th style="padding:15px; text-align:left; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">Staff</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in txns %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding:15px; color: #475569;">{{ t.created_at|date:"d M Y" }}<br><small style="color: #94a3b8;">{{ t.created_at|date:"H:i" }}</small></td>
+                    <td style="padding:15px;">
+                        <div style="font-weight:700; color: #1e293b;">{{ t.account.member.member_number }}</div>
+                        <div style="font-size:0.75rem; color:#64748b;">{{ t.account.member.user.get_full_name|default:t.account.member.user.username }}</div>
+                    </td>
+                    <td style="padding:15px; text-align:center;">
+                        <span class="badge {% if t.txn_type == 'DEPOSIT' %}badge-deposit{% else %}badge-withdrawal{% endif %}">
+                            {{ t.txn_type }}
+                        </span>
+                    </td>
+                    <td style="padding:15px; text-align:right; font-weight:700; font-family: monospace;">KES {{ t.amount|floatformat:2 }}</td>
+                    <td style="padding:15px; text-align:right; color:#b45309; font-family: monospace;">
+                        {% with f=t.fee_amount|add:t.membership_fee_amount %}
+                            {% if f > 0 %}KES {{ f|floatformat:2 }}{% else %}<span style="color: #cbd5e1;">-</span>{% endif %}
+                        {% endwith %}
+                    </td>
+                    <td style="padding:15px; font-size: 0.8rem; color: #64748b;">{{ t.created_by.username }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding: 50px; text-align: center; color: #94a3b8;">
+                        <i class="fa-solid fa-filter" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No transactions match your search criteria.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

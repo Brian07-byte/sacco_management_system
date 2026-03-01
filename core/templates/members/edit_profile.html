@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper profile-edit-wrapper">
+    <a href="{% url 'members:my_profile' %}" class="back-home">
+        <i class="fa-solid fa-chevron-left"></i>
+        <span>Back to Profile</span>
+    </a>
+
+    <div class="auth-card">
+        <div class="auth-header edit-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <div>
+                <h2>Update Information</h2>
+                <p>Modify your account details and contact information.</p>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Please check the highlighted fields</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-section-title">KYC & Personal Details</div>
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.name in "national_id,kra_pin,date_of_birth,gender" %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid 
+                                    {% if 'id' in field.name %}fa-id-card
+                                    {% elif 'pin' in field.name %}fa-fingerprint
+                                    {% elif 'date' in field.name %}fa-calendar-day
+                                    {% else %}fa-venus-mars{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                            {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section-title">Address & Location</div>
+            <div class="form-grid">
+                 {% for field in form %}
+                    {% if field.name in "address,town,county,alternative_phone" %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid 
+                                    {% if 'address' in field.name %}fa-map-location-dot
+                                    {% elif 'town' in field.name %}fa-city
+                                    {% elif 'county' in field.name %}fa-map
+                                    {% else %}fa-phone-flip{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section-title">Next of Kin (Emergency Contact)</div>
+            {% for field in form %}
+                {% if "next_of_kin" in field.name %}
+                    <div class="form-group {% if field.errors %}has-error{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid 
+                                {% if 'name' in field.name %}fa-user-shield
+                                {% elif 'phone' in field.name %}fa-mobile-retro
+                                {% else %}fa-people-arrows{% endif %}"></i>
+                            {{ field }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="edit-actions">
+                <button class="btn-auth-success" type="submit">
+                    Save Changes <i class="fa-solid fa-cloud-arrow-up"></i>
+                </button>
+                <a href="" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

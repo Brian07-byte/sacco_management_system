@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Audit Logs | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Audit Logs</h1>
+      <p>Filter by module/action/date and search reference.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+      <div>
+        <label>Module</label>
+        <select name="module">
+          <option value="">All</option>
+          {% for key,label in MODULES %}
+            <option value="{{ key }}" {% if module == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Action</label>
+        <select name="action">
+          <option value="">All</option>
+          {% for key,label in ACTIONS %}
+            <option value="{{ key }}" {% if action == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Start (YYYY-MM-DD)</label>
+        <input name="start" value="{{ start }}" placeholder="2026-02-01">
+      </div>
+
+      <div>
+        <label>End (YYYY-MM-DD)</label>
+        <input name="end" value="{{ end }}" placeholder="2026-02-27">
+      </div>
+
+      <div style="flex:1; min-width:220px;">
+        <label>Search</label>
+        <input name="q" value="{{ q }}" placeholder="member no / ref / username / message">
+      </div>
+
+      <button class="btn-staff-primary" type="submit">Filter</button>
+      <a class="btn-staff-outline" href="{% url 'audits:logs' %}">Reset</a>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Module</th>
+            <th>Action</th>
+            <th>Actor</th>
+            <th>Member</th>
+            <th>Reference</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in logs %}
+          <tr>
+            <td>{{ l.created_at|date:"Y-m-d H:i" }}</td>
+            <td><strong>{{ l.module }}</strong></td>
+            <td>{{ l.action }}</td>
+            <td>{{ l.actor.username|default:"-" }}</td>
+            <td>{{ l.member.member_number|default:"-" }}</td>
+            <td><code>{{ l.reference|default:"-" }}</code></td>
+            <td>{{ l.message }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7">No logs found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

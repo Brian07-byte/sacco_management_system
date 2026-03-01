@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Mark Disbursed | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-blue: #1a2b4b;
+    --accent-indigo: #4f46e5;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f9fafb;
+    --border-color: #e5e7eb;
+  }
+
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); }
+
+  .form-container {
+    max-width: 650px;
+    margin: 50px auto;
+    padding: 0 20px;
+  }
+
+  .form-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px; }
+
+  /* Disbursement Summary Banner */
+  .disburse-banner {
+    background: #eef2ff;
+    border-left: 4px solid var(--accent-indigo);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .banner-label { font-size: 0.8rem; color: #4338ca; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; }
+  .banner-value { font-size: 1.25rem; font-weight: 800; color: var(--primary-blue); }
+
+  /* Info Note */
+  .info-note {
+    font-size: 0.85rem;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  /* Django Form Styling */
+  form p { margin-bottom: 20px; }
+  
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-main);
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: var(--accent-indigo);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 10px;
+  }
+
+  .btn-submit:hover { background: #3730a3; }
+
+  .cancel-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+</style>
+
+<div class="form-container">
+  <div class="form-card">
+    <h2>Confirm Disbursement</h2>
+    <p style="color: var(--text-muted); margin-bottom: 25px;">Ensure the funds have been sent to the member's account before marking as complete.</p>
+
+    <div class="disburse-banner">
+      <div>
+        <span class="banner-label">Member Number</span><br>
+        <span style="font-weight: 600;">{{ loan.member.member_number }}</span>
+      </div>
+      <div style="text-align: right;">
+        <span class="banner-label">Principal to Disburse</span><br>
+        <span class="banner-value">KES {{ loan.principal }}</span>
+      </div>
+    </div>
+
+    <div class="info-note">
+      <svg style="width:20px; height:20px; color:#64748b; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span>By confirming, the loan status will change to <strong>ACTIVE</strong> and the repayment schedule will begin based on the disbursement date.</span>
+    </div>
+
+    
+
+    <form method="post">
+      {% csrf_token %}
+      
+      {% for field in form %}
+        <div style="margin-bottom: 20px;">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <small style="color: #ef4444; font-size: 0.8rem;">{{ field.errors.0 }}</small>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button class="btn-submit" type="submit">
+        <svg style="width:18px;height:18px;vertical-align:middle;margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Confirm & Activate Loan
+      </button>
+    </form>
+
+    <a href="{% url 'loans:application_detail' loan.pk %}" class="cancel-link">Back to Details</a>
+  </div>
+</div>
+{% endblock %}

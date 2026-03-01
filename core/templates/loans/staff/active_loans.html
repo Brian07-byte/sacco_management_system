@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Active Loans | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-indigo: #4f46e5;
+    --primary-dark: #1e293b;
+    --success: #10b981;
+    --bg-light: #f8fafc;
+    --border: #e2e8f0;
+    --text-main: #334155;
+  }
+
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); }
+
+  .list-container { padding: 2.5rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+  /* Header Section */
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-main h1 { font-size: 1.875rem; font-weight: 800; color: var(--primary-dark); margin: 0; letter-spacing: -0.025em; }
+  .header-main p { color: #64748b; margin-top: 0.5rem; font-size: 1rem; }
+
+  /* Action Buttons */
+  .header-actions { display: flex; gap: 12px; }
+
+  .btn-staff-primary {
+    background: var(--primary-indigo);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+  }
+
+  .btn-staff-outline {
+    background: white;
+    color: var(--text-main);
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+
+  .btn-staff-primary:hover { background: #4338ca; transform: translateY(-1px); }
+  .btn-staff-outline:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+  /* Portfolio Table Card */
+  .table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
+    overflow: hidden;
+  }
+
+  .modern-table { width: 100%; border-collapse: collapse; }
+
+  .modern-table th {
+    background-color: #fcfcfd;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .modern-table td { padding: 1.125rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.935rem; }
+
+  .modern-table tr:hover { background-color: #f8fafc; }
+
+  /* Typography & Badges */
+  .member-pill {
+    background: #f1f5f9;
+    color: var(--primary-dark);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .amount-payable { color: #64748b; font-size: 0.875rem; }
+  
+  .balance-highlight {
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #ecfdf5;
+    color: #065f46;
+  }
+
+  .text-right { text-align: right; }
+</style>
+
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Active Portfolio</h1>
+      <p>Monitoring <strong>{{ loans.count }}</strong> active credit facilities.</p>
+    </div>
+    <div class="header-actions">
+      <a class="btn-staff-outline" href="{% url 'loans:pending_disbursements' %}">
+        <svg style="width:16px; height:16px; vertical-align:middle; margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Disbursements
+      </a>
+      <a class="btn-staff-primary" href="{% url 'loans:record_repayment' %}">
+        <svg style="width:16px; height:16px; vertical-align:middle; margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        Record Repayment
+      </a>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow-x:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Member ID</th>
+            <th>Loan Product</th>
+            <th class="text-right">Total Payable</th>
+            <th class="text-right">Current Balance</th>
+            <th>Disbursement</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in loans %}
+          <tr>
+            <td>
+              <span class="member-pill">{{ l.member.member_number }}</span>
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">{{ l.member.user.get_full_name }}</div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: var(--primary-dark);">{{ l.product.name }}</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Ref: #{{ l.pk }}</div>
+            </td>
+            <td class="text-right">
+              <span class="amount-payable">KES {{ l.total_payable }}</span>
+            </td>
+            <td class="text-right">
+              <span class="balance-highlight">KES {{ l.balance }}</span>
+            </td>
+            <td>
+              <span class="status-tag">
+                {{ l.disbursement_status }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 5rem; color: #94a3b8;">
+              <svg style="width:48px; height:48px; margin-bottom:1rem; opacity:0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0h-1.5M4 13H5.5m2.5 4h8M8 21h8a2 2 0 002-2v-3H6v3a2 2 0 002 2z"></path></svg>
+              <p>No active loans in the portfolio.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

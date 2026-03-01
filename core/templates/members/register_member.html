@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register Member | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="staff-container">
+    <div class="staff-header">
+        <div class="staff-badge"><i class="fa-solid fa-user-shield"></i> Staff Portal</div>
+        <h1>New Member Registration</h1>
+        <p>Complete all mandatory fields to initialize a new member account and profile.</p>
+    </div>
+
+    <div class="auth-card staff-card">
+        {% if form.errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Data Validation Failed</span>
+            </div>
+            <ul class="error-list">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-section-header">
+                <div class="section-num">1</div>
+                <h3>System Credentials</h3>
+            </div>
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.name in "user,username,email,member_number" %}
+                        <div class="form-group">
+                            <label>{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid {% if 'user' in field.name %}fa-user-circle{% elif 'email' in field.name %}fa-envelope{% else %}fa-hashtag{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section-header">
+                <div class="section-num">2</div>
+                <h3>Identity & KYC Details</h3>
+            </div>
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.name in "national_id,kra_pin,date_of_birth,gender" %}
+                        <div class="form-group">
+                            <label>{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid {% if 'id' in field.name %}fa-id-card{% elif 'pin' in field.name %}fa-fingerprint{% elif 'date' in field.name %}fa-calendar{% else %}fa-venus-mars{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section-header">
+                <div class="section-num">3</div>
+                <h3>Location & Address</h3>
+            </div>
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.name in "address,town,county,alternative_phone" %}
+                        <div class="form-group">
+                            <label>{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid {% if 'address' in field.name %}fa-map-location-dot{% elif 'town' in field.name %}fa-city{% elif 'county' in field.name %}fa-map{% else %}fa-phone{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="staff-actions">
+                <button class="btn-staff-primary" type="submit">
+                    <i class="fa-solid fa-user-plus"></i> Finalize Registration
+                </button>
+                <a href="#" class="btn-staff-link">Clear Form</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

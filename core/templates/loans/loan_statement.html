@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Loan Statement</h2>
+        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Print Statement</button>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Original Loan</h6>
+                    <h4>KES {{ loan.total_payable }}</h4>
+                    <small>{{ loan.product.name }} | {{ loan.term_months }} Months</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Paid to Date</h6>
+                    <h4 class="text-success">KES {{ total_paid }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="text-white-50">Current Outstanding Balance</h6>
+                    <h4>KES {{ loan.balance }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Transaction Ledger</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Description</th>
+                        <th class="text-end">Debit (Loan)</th>
+                        <th class="text-end">Credit (Payment)</th>
+                        <th class="text-end pe-4">Running Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-4">{{ loan.created_at|date:"d M Y" }}</td>
+                        <td>Initial Loan Disbursement (Principal + Interest + Fees)</td>
+                        <td class="text-end">{{ loan.total_payable }}</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end pe-4 fw-bold text-primary">{{ loan.total_payable }}</td>
+                    </tr>
+
+                    {% for line in statement_lines %}
+                    <tr>
+                        <td class="ps-4">{{ line.date|date:"d M Y" }}</td>
+                        <td>{{ line.description }}</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end text-success">- {{ line.amount }}</td>
+                        <td class="text-end pe-4 fw-bold">{{ line.balance }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-dark">
+                    <tr>
+                        <td colspan="4" class="ps-4">Current Outstanding Balance</td>
+                        <td class="text-end pe-4 fw-bold">KES {{ loan.balance }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

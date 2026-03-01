@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}My Loans | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    /* Container & Layout */
+.list-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.list-header {
+    margin-bottom: 2rem;
+    border-left: 5px solid #2c3e50; /* A professional SACCO accent color */
+    padding-left: 1rem;
+}
+
+.header-main h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.header-main p {
+    color: #666;
+    margin: 0.5rem 0 0;
+}
+
+/* Table Card Styling */
+.table-card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.modern-table th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.modern-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    color: #444;
+}
+
+.modern-table tr:hover {
+    background-color: #fcfcfc;
+}
+
+/* Helper Classes */
+.text-right { text-align: right; }
+
+.btn-staff-outline {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border: 1.5px solid #2c3e50;
+    color: #2c3e50;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-staff-outline:hover {
+    background-color: #2c3e50;
+    color: white;
+}
+</style>
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>My Loans</h1>
+      <p>Your loan accounts and balances.</p>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th class="text-right">Principal</th>
+            <th class="text-right">Total Payable</th>
+            <th class="text-right">Balance</th>
+            <th>Status</th>
+            <th>Disbursement</th>
+            <th class="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in loans %}
+          <tr>
+            <td><strong>{{ l.product.name }}</strong></td>
+            <td class="text-right">KES {{ l.principal }}</td>
+            <td class="text-right">KES {{ l.total_payable }}</td>
+            <td class="text-right"><strong>KES {{ l.balance }}</strong></td>
+            <td>{{ l.status }}</td>
+            <td>{{ l.disbursement_status }}</td>
+            <td class="text-right">
+              <a class="btn-staff-outline" href="{% url 'loans:loan_detail' l.pk %}">View</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7">No loans found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

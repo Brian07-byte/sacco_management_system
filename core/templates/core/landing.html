@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="hero-container">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fa-solid fa-shield-check"></i> Regulated & Secure
+        </div>
+        <h1 class="hero-title">Financial Growth, <span>Together.</span></h1>
+        <p class="hero-subtitle">
+            Experience the next generation of credit union management. 
+            Secure savings, instant loan processing, and transparent reporting—all in one place.
+        </p>
+
+        <div class="hero-actions">
+            {% if not user.is_authenticated %}
+                <a class="btn-primary-large" href="{% url 'accounts:signup' %}">
+                    Get Started <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a class="btn-secondary-large" href="{% url 'accounts:login' %}">
+                    Member Login
+                </a>
+            {% else %}
+                <a class="btn-primary-large" href="{% url 'core:dashboard' %}">
+                    Access Dashboard <i class="fa-solid fa-gauge-high"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="f-icon blue"><i class="fa-solid fa-vault"></i></div>
+            <h3>Smart Savings</h3>
+            <p>Track your contributions and watch your dividends grow in real-time.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon green"><i class="fa-solid fa-bolt"></i></div>
+            <h3>Quick Loans</h3>
+            <p>Apply for loans and get instant feedback on your application status.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon purple"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <h3>Transparent</h3>
+            <p>Access your statements and financial reports anytime, anywhere.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

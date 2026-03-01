@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Pending Disbursements | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-blue: #1a2b4b;
+    --accent-indigo: #4f46e5;
+    --accent-amber: #d97706;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f8fafc;
+    --border-color: #e5e7eb;
+  }
+
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); }
+
+  .list-container { padding: 3rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .header-main h1 { font-size: 1.8rem; font-weight: 800; color: var(--primary-blue); margin: 0; letter-spacing: -0.025em; }
+  .header-main p { color: var(--text-muted); margin-top: 4px; font-size: 0.95rem; }
+
+  /* Table Card Styling */
+  .table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+  }
+
+  .modern-table { width: 100%; border-collapse: collapse; }
+
+  .modern-table th {
+    background-color: #f9fafb;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+  }
+
+  .modern-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+
+  /* Member Badge */
+  .member-id {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: var(--primary-blue);
+    background: #eff6ff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+
+  /* Status Indicators */
+  .status-pill {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .status-authorized { background: #e0e7ff; color: #3730a3; }
+
+  /* Action Buttons */
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    color: white;
+  }
+
+  .btn-authorize { background: var(--accent-amber); box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2); }
+  .btn-authorize:hover { background: #b45309; }
+
+  .btn-disburse { background: var(--accent-indigo); box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
+  .btn-disburse:hover { background: #3730a3; }
+
+  .text-right { text-align: right; }
+  .amount-text { font-weight: 600; color: var(--text-main); font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Disbursement Queue</h1>
+      <p>Finalize authorized funding and post associated service fees.</p>
+    </div>
+  </div>
+
+  
+
+  <div class="table-card">
+    <div style="overflow-x:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Member Account</th>
+            <th>Loan Product</th>
+            <th class="text-right">Principal Amount</th>
+            <th class="text-right">Service Fees</th>
+            <th>Current Stage</th>
+            <th class="text-right">Action Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in loans %}
+          <tr>
+            <td>
+              <span class="member-id">{{ l.member.member_number }}</span>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">{{ l.member.user.get_full_name }}</div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: var(--primary-blue);">{{ l.product.name }}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Ref: #{{ l.pk }}</div>
+            </td>
+            <td class="text-right">
+              <span class="amount-text">KES {{ l.principal }}</span>
+            </td>
+            <td class="text-right">
+              <span class="amount-text" style="color: #dc2626;">KES {{ l.fees_total }}</span>
+            </td>
+            <td>
+              <span class="status-pill {% if l.disbursement_status == 'PENDING' %}status-pending{% else %}status-authorized{% endif %}">
+                {{ l.disbursement_status }}
+              </span>
+            </td>
+            <td class="text-right">
+              {% if l.disbursement_status == "PENDING" %}
+                <a class="btn-action btn-authorize" href="{% url 'loans:authorize_disbursement' l.pk %}">
+                  <svg style="width:14px;height:14px;margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  Authorize
+                </a>
+              {% elif l.disbursement_status == "AUTHORIZED" %}
+                <a class="btn-action btn-disburse" href="{% url 'loans:mark_disbursed' l.pk %}">
+                  <svg style="width:14px;height:14px;margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                  Mark Disbursed
+                </a>
+              {% else %}
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding-right: 12px;">Processed</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+              <svg style="width:48px;height:48px;opacity:0.2;margin-bottom:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+              <p>The disbursement queue is currently empty.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

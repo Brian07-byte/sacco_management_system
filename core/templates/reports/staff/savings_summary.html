@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Savings Summary | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container position-relative">
+  <div class="pamoja-watermark">PAMOJA SACCO</div>
+
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Savings Summary</h1>
+      <p>Comprehensive list of all member savings accounts.</p>
+    </div>
+    <div class="header-actions">
+        <button onclick="window.print()" class="btn-print"><i class="bi bi-download"></i> Export Master List</button>
+    </div>
+  </div>
+
+  <div class="audit-summary-grid mb-4">
+    <div class="audit-tile tile-net shadow-sm">
+      <span class="tile-label">Global SACCO Savings</span>
+      <span class="tile-value text-indigo">KES {{ total_savings }}</span>
+    </div>
+  </div>
+
+  <div class="table-card shadow-lg">
+    <div class="card-header-styled">
+        <h3 class="m-0 text-slate-700">Member Accounts</h3>
+        <span class="badge-count">{{ accounts|length }} Total Records</span>
+    </div>
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Member ID</th>
+            <th>Full Name</th>
+            <th class="text-right">Current Balance</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in accounts %}
+          <tr>
+            <td>
+                <span class="member-id-pill">{{ a.member.member_number }}</span>
+            </td>
+            <td>
+                <div class="fw-bold text-slate-800">{{ a.member.user.get_full_name|default:a.member.user.username }}</div>
+                <small class="text-muted">{{ a.member.user.email|lower }}</small>
+            </td>
+            <td class="text-right">
+                <span class="fw-bold text-success">KES {{ a.balance }}</span>
+            </td>
+            <td class="text-center">
+                <a href="#" class="btn-view-mini">View Profile</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center py-5 text-muted">No accounts found in the system.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+    /* Layout & Background */
+    .list-container { padding: 40px 20px; background: #f8fafc; min-height: 100vh; }
+
+    .pamoja-watermark {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 8vw; font-weight: 900; color: rgba(0, 0, 0, 0.03);
+        pointer-events: none; z-index: 0; white-space: nowrap;
+    }
+
+    /* Header */
+    .list-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;
+    }
+    .header-main h1 { color: #1e293b; font-weight: 800; margin-bottom: 5px; }
+
+    /* Summary Tile */
+    .audit-summary-grid { display: grid; grid-template-columns: 1fr; }
+    .audit-tile {
+        background: white; padding: 20px 30px; border-radius: 12px;
+        border-top: 5px solid #4f46e5; display: inline-block;
+    }
+    .tile-label { font-size: 0.8rem; font-weight: 700; color: #64748b;  }
+    .tile-value { font-size: 2rem; font-weight: 900; margin-top: 5px; }
+
+    /* Table & Cards */
+    .table-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .card-header-styled { padding: 20px; background: #ffffff; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    
+    .badge-count { background: #eef2ff; color: #4f46e5; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+
+    .modern-table { width: 100%; border-collapse: collapse; }
+    .modern-table th { background: #f8fafc; color: #475569; padding: 15px 20px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+    .modern-table td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    /* UI Components */
+    .member-id-pill {
+        background: #f1f5f9; color: #1e293b; padding: 4px 10px; border-radius: 6px;
+        font-family: monospace; font-weight: 700; font-size: 0.9rem; border: 1px solid #e2e8f0;
+    }
+    
+    .btn-view-mini {
+        font-size: 0.75rem; font-weight: 700; text-decoration: none;
+        color: #4f46e5; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .btn-view-mini:hover { background: #4f46e5; color: white; border-color: #4f46e5; }
+
+    .text-right { text-align: right; }
+    .text-indigo { color: #4f46e5; }
+    .text-success { color: #10b981; }
+
+    .btn-print { background: #1e293b; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+    @media print { .btn-print, .btn-view-mini { display: none; } .list-container { background: white; padding: 0; } }
+</style>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Withdraw | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Withdrawal Page Specifics --- */
+.withdrawal-wrapper {
+    max-width: 500px;
+}
+
+.icon-withdraw {
+    background: #fffbeb !important; /* Light Gold */
+    color: #d97706 !important;     /* Warning Orange */
+    border: 1px solid #fef3c7 !important;
+}
+
+/* --- Mini Balance Header --- */
+.balance-summary-mini {
+    display: flex;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.b-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 10px;
+}
+
+.border-left {
+    border-left: 1px solid #cbd5e1;
+}
+
+.b-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-light);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.b-val {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--sacco-navy);
+}
+
+.balance-highlight {
+    color: var(--sacco-green);
+}
+
+/* --- Hint & Notice --- */
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 5px;
+    display: block;
+}
+
+.withdrawal-notice {
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+
+.withdrawal-notice i {
+    color: #0ea5e9;
+    margin-top: 3px;
+}
+
+.withdrawal-notice p {
+    font-size: 0.8rem;
+    color: #0369a1;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* --- Withdrawal Button --- */
+.btn-auth-withdraw {
+    width: 100%;
+    background: var(--sacco-navy);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+
+.btn-auth-withdraw:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+}
+</style>
+<div class="auth-wrapper withdrawal-wrapper">
+    <a href="{% url 'savings:my' %}" class="back-home">
+        <i class="fa-solid fa-chevron-left"></i>
+        <span>Back to Savings</span>
+    </a>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle icon-withdraw">
+                <i class="fa-solid fa-money-bill-transfer"></i>
+            </div>
+            <h2>Request Withdrawal</h2>
+            <p>Your request will be reviewed by staff for security and limits.</p>
+        </div>
+
+        <div class="balance-summary-mini">
+            <div class="b-item">
+                <span class="b-label">Member ID</span>
+                <span class="b-val">{{ account.member.member_number }}</span>
+            </div>
+            <div class="b-item border-left">
+                <span class="b-label">Available Balance</span>
+                <span class="b-val balance-highlight">KES {{ account.balance }}</span>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Check Withdrawal Limits</span>
+            </div>
+            <ul class="error-list">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.amount.id_for_label }}">Amount to Withdraw (KES)</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-coins"></i>
+                    {{ form.amount }}
+                </div>
+                <small class="form-hint">Minimum withdrawal: KES 500.00</small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.reason.id_for_label }}">Reason for Withdrawal (Optional)</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    {{ form.reason }}
+                </div>
+            </div>
+
+            <div class="withdrawal-notice">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>Withdrawals are processed within 24 hours. You will receive an SMS notification once approved.</p>
+            </div>
+
+            <button class="btn-auth-withdraw" type="submit">
+                Submit Request <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Changed your mind? <a href="{% url 'savings:my' %}">Cancel and Return</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

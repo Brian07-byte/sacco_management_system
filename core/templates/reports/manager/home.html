@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Daily Report | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container position-relative">
+  <div class="pamoja-watermark">PAMOJA SACCO</div>
+
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Daily Operational Report</h1>
+      <p>System activities for <strong>{{ today|date:"l, d F Y" }}</strong></p>
+    </div>
+    <div class="header-actions">
+        <button onclick="window.print()" class="btn-print"><i class="bi bi-file-earmark-pdf"></i> Export Daily Log</button>
+    </div>
+  </div>
+
+  <h5 class="section-title text-slate-500"><i class="bi bi-piggy-bank me-2"></i>Savings Summary</h5>
+  <div class="audit-summary-grid">
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Savings Deposits</span>
+      <span class="tile-value text-success">KES {{ savings_in }}</span>
+    </div>
+    <div class="audit-tile tile-out">
+      <span class="tile-label">Savings Withdrawals</span>
+      <span class="tile-value text-danger">KES {{ savings_out }}</span>
+    </div>
+    <div class="audit-tile tile-net">
+      <span class="tile-label">Savings Net Flow</span>
+      <span class="tile-value text-indigo">KES {{ savings_net }}</span>
+    </div>
+  </div>
+
+  <h5 class="section-title text-slate-500 mt-4"><i class="bi bi-cash-stack me-2"></i>Loan Collections</h5>
+  <div class="audit-summary-grid">
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Total Repayments Collected</span>
+      <span class="tile-value text-success">KES {{ repayments_total }}</span>
+    </div>
+  </div>
+
+  <div class="table-card mt-4">
+    <div class="card-header-styled">
+        <h3 class="m-0">Savings Transactions</h3>
+        <span class="badge-count">{{ savings_txns|length }} Txns</span>
+    </div>
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Member ID</th>
+            <th>Type</th>
+            <th>Reference</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in savings_txns %}
+          <tr>
+            <td class="text-muted fw-medium">{{ t.created_at|date:"H:i" }}</td>
+            <td><span class="fw-bold text-slate-700">{{ t.account.member.member_number }}</span></td>
+            <td>
+                <span class="type-badge {% if t.txn_type == 'DEPOSIT' %}deposit{% else %}withdrawal{% endif %}">
+                    {{ t.txn_type }}
+                </span>
+            </td>
+            <td><code>{{ t.reference }}</code></td>
+            <td class="text-right fw-bold {% if t.txn_type == 'DEPOSIT' %}text-success{% else %}text-danger{% endif %}">
+                KES {{ t.amount }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center py-4 text-muted">No savings transactions today.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card mt-4">
+    <div class="card-header-styled">
+        <h3 class="m-0">Loan Repayments</h3>
+        <span class="badge-count bg-indigo-subtle text-indigo">{{ repayments|length }} Repayments</span>
+    </div>
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Member ID</th>
+            <th>Reference</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in repayments %}
+          <tr>
+            <td class="text-muted fw-medium">{{ r.created_at|date:"H:i" }}</td>
+            <td><span class="fw-bold text-slate-700">{{ r.loan.member.member_number }}</span></td>
+            <td><code>{{ r.reference }}</code></td>
+            <td class="text-right fw-bold text-success">KES {{ r.amount }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center py-4 text-muted">No repayments recorded today.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+    /* Global Styles consistent with previous templates */
+    .list-container { padding: 40px 20px; background: #f8fafc; min-height: 100vh; }
+    
+    .pamoja-watermark {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 8vw; font-weight: 900; color: rgba(0, 0, 0, 0.03);
+        pointer-events: none; z-index: 0; white-space: nowrap;
+    }
+
+    .list-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;
+    }
+    .header-main h1 { color: #1e293b; font-weight: 700; margin-bottom: 5px; }
+    
+    .section-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+
+    /* Summary Grid */
+    .audit-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+    .audit-tile {
+        background: white; padding: 20px; border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top: 4px solid #cbd5e1;
+    }
+    .tile-in { border-top-color: #10b981; }
+    .tile-out { border-top-color: #ef4444; }
+    .tile-net { border-top-color: #4f46e5; }
+
+    .tile-label { font-size: 0.75rem; font-weight: 700; color: #64748b;  }
+    .tile-value { font-size: 1.4rem; font-weight: 800; display: block; margin-top: 5px; }
+
+    /* Table & Cards */
+    .table-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
+    .card-header-styled { padding: 15px 20px; background: #ffffff; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .card-header-styled h3 { font-size: 1.1rem; font-weight: 700; color: #334155; }
+    
+    .badge-count { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+
+    .modern-table { width: 100%; border-collapse: collapse; }
+    .modern-table th { background: #f8fafc; color: #64748b; padding: 12px 20px; font-size: 0.7rem; text-transform: uppercase; font-weight: 800; }
+    .modern-table td { padding: 14px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+
+    /* Badges */
+    .type-badge { font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; }
+    .deposit { background: #dcfce7; color: #166534; }
+    .withdrawal { background: #fee2e2; color: #991b1b; }
+
+    .text-right { text-align: right; }
+    .text-success { color: #10b981; }
+    .text-danger { color: #ef4444; }
+    .text-indigo { color: #4f46e5; }
+
+    .btn-print { background: #1e293b; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+
+    @media print { .btn-print { display: none; } .list-container { background: white; padding: 0; } }
+</style>
+{% endblock %}

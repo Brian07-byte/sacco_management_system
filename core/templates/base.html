@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Pamoja SACCO{% endblock %}</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-left">
+      <a href="{% url 'core:landing' %}" class="brand">
+        <div class="logo-box"><i class="fas fa-landmark"></i></div>
+        Pamoja <span>SACCO</span>
+      </a>
+    </div>
+
+    <div class="nav-center">
+      {% if user.is_authenticated %}
+
+        <div class="dropdown">
+          <button class="dropbtn"><i class="fas fa-users-gear"></i> Members <i class="fas fa-chevron-down small-icon"></i></button>
+          <div class="dropdown-content">
+            {% if user.role == "MEMBER" %}
+              <a href="{% url 'members:my_profile' %}"><i class="fas fa-user-circle"></i> My Profile</a>
+              <a href="{% url 'members:edit_profile' %}"><i class="fas fa-user-pen"></i> Edit Profile</a>
+              <a href="#"><i class="fas fa-file-invoice"></i> Member Statement</a>
+              <a href="#"><i class="fas fa-chart-line"></i> Account Summary</a>
+            {% else %}
+              <a href="{% url 'members:register' %}"><i class="fas fa-user-plus"></i> Register Member</a>
+              <a href="{% url 'members:list' %}"><i class="fas fa-address-book"></i> Members List</a>
+              <a href="#"><i class="fas fa-file-lines"></i> Statements</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn"><i class="fas fa-piggy-bank"></i> Savings <i class="fas fa-chevron-down small-icon"></i></button>
+          <div class="dropdown-content">
+            {% if user.role == "MEMBER" %}
+              <a href="{% url 'savings:my' %}"><i class="fas fa-wallet"></i> Savings Balance</a>
+              <a href="{% url 'savings:my_transactions' %}"><i class="fas fa-clock-rotate-left"></i> Savings Transactions</a>
+              <a href="{% url 'savings:member_withdrawal' %}"><i class="fas fa-money-bill-transfer"></i> Withdrawal Request</a>
+              <a href="{% url 'savings:member_deposit' %}"><i class="fas fa-circle-plus"></i> Deposit Request</a>
+              <a href="{% url 'savings:statement' %}"><i class="fas fa-file-medical"></i> Savings Statement</a>
+            {% else %}
+              <a href="{% url 'savings:accounts_list' %}"><i class="fas fa-list-check"></i> Accounts List</a>
+              <a href="{% url 'savings:deposit' %}"><i class="fas fa-circle-plus"></i> Record Deposit</a>
+              <a href="{% url 'savings:withdraw' %}"><i class="fas fa-circle-minus"></i> Record Withdrawal</a>
+              <a href="{% url 'savings:pending' %}"><i class="fas fa-circle-plus"></i> Pending Approvals</a>
+              <a href="{% url 'savings:daily' %}"><i class="fas fa-receipt"></i> Daily Transactions</a>
+              <a href="{% url 'savings:report' %}"><i class="fas fa-chart-pie"></i> Savings Reports</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn"><i class="fas fa-hand-holding-dollar"></i> Loans <i class="fas fa-chevron-down small-icon"></i></button>
+          <div class="dropdown-content">
+            {% if user.role == "MEMBER" %}
+              <a href="{% url 'loans:apply' %}"><i class="fas fa-file-signature"></i> Apply for Loan</a>
+              <a href="{% url 'loans:my_applications' %}"><i class="fas fa-folder-open"></i> My Applications</a>
+              <a href="{% url 'loans:my_loans' %}"><i class="fas fa-circle-check"></i> My Active Loan</a>
+              <a href="{% url 'loans:repayment_history' %}"><i class="fas fa-history"></i> Repayment History</a> 
+              <a href="{% url 'loans:my_loans' %}"><i class="fas fa-file-contract"></i> Loan Statement</a>
+            {% elif user.role == "CLERK" %}
+              <a href="{% url 'loans:applications_queue' %}"><i class="fas fa-list-ul"></i> Applications Queue</a>
+              <a href="{% url 'loans:record_repayment' %}"><i class="fas fa-money-check-dollar"></i> Record Repayments</a>
+              <a href="{% url 'loans:active_loans' %}"><i class="fas fa-check-double"></i> Active Loans</a>
+              <a href="{% url 'loans:cleared_loans' %}"><i class="fas fa-lock"></i> Cleared Loans</a>
+            {% elif user.role == "MANAGER" %}
+              <a href="{% url 'loans:applications_queue' %}"><i class="fas fa-list-ul"></i> Applications Queue</a>
+              <a href=""><i class="fas fa-clipboard-check"></i> Approve Loans</a>
+              <a href="{% url 'loans:pending_disbursements' %}"><i class="fas fa-vault"></i> Authorize Disbursements</a>
+              <a href="{% url 'loans:record_repayment' %}"><i class="fas fa-money-check-dollar"></i> Record Repayments</a>
+              <a href="{% url 'loans:active_loans' %}"><i class="fas fa-check-double"></i> Active Loans</a>
+            {% endif %}
+          </div>
+        </div>
+    
+        {% if user.role == "MANAGER" or user.is_superuser %}
+        <div class="dropdown">
+          <button class="dropbtn"><i class="fas fa-coins"></i> Finance <i class="fas fa-chevron-down small-icon"></i></button>
+          <div class="dropdown-content">
+            <a href="{% url 'finance:dashboard' %}"><i class="fas fa-chart-simple"></i> Finance Dashboard</a>
+            <a href="{% url 'finance:accounts' %}"><i class="fas fa-university"></i> Finance Accounts</a>
+            <a href="{% url 'finance:ledger' %}"><i class="fas fa-book-open"></i> General Ledger</a>
+            <a href="{% url 'finance:fees_report' %}"><i class="fas fa-file-invoice-dollar"></i> Fees Report</a>
+            <a href="{% url 'finance:policy' %}"><i class="fas fa-gears"></i> Charge Policy</a>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="dropdown">
+          <button class="dropbtn"><i class="fas fa-chart-pie"></i> Reports <i class="fas fa-chevron-down small-icon"></i></button>
+          <div class="dropdown-content">
+            {% if user.role == "MEMBER" %}
+              <a href="{% url 'reports:my_home' %}"><i class="fas fa-home"></i> My Reports</a>
+              <a href="{% url 'reports:my_savings' %}"><i class="fas fa-piggy-bank"></i> Savings Report</a>
+              <a href="{% url 'reports:my_loans' %}"><i class="fas fa-hand-holding-dollar"></i> Loans Report</a>
+            {% else %}
+              <a href="{% url 'reports:staff_home' %}"><i class="fas fa-house-laptop"></i> Staff Home</a>
+              <a href="{% url 'reports:staff_daily' %}"><i class="fas fa-calendar-day"></i> Daily Report</a>
+              <a href="{% url 'reports:staff_savings_summary' %}"><i class="fas fa-sack-dollar"></i> Savings Summary</a>
+              <a href="{% url 'reports:staff_loans_summary' %}"><i class="fas fa-file-contract"></i> Loans Summary</a>
+              {% if user.role == "MANAGER" %}
+                <a href="{% url 'reports:manager_home' %}"><i class="fas fa-magnifying-glass-chart"></i> Manager Analytics</a>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+
+        
+
+        <div class="dropdown">
+          <button class="dropbtn"><i class="fas fa-cog"></i> Settings <i class="fas fa-chevron-down small-icon"></i></button>
+          <div class="dropdown-content">
+            <a href="{% url 'settingsapp:home' %}"><i class="fas fa-sliders"></i> Configuration</a>
+            <a href="{% url 'settingsapp:savings_products' %}"><i class="fas fa-box-archive"></i> Savings Products</a>
+            <a href="{% url 'settingsapp:loan_products' %}"><i class="fas fa-tags"></i> Loan Products</a>
+            {% if user.role == "MANAGER" or user.is_superuser %}
+              <hr style="margin: 8px 0; opacity: 0.1;">
+              <a href="{% url 'settingsapp:policy_edit' %}"><i class="fas fa-file-shield"></i> Manage Policy</a>
+              <a href="{% url 'settingsapp:savings_create' %}"><i class="fas fa-plus-circle"></i> New Product</a>
+            {% endif %}
+          </div>
+        </div>
+
+      {% endif %}
+    </div>
+
+    <div class="nav-right">
+      {% if user.is_authenticated %}
+        <a href="{% url 'core:dashboard' %}" class="nav-link">Dashboard</a>
+        <a href="{% url 'accounts:logout' %}" class="logout-btn">Logout</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="nav-link">Login</a>
+        <a href="{% url 'accounts:signup' %}" class="btn">Sign Up</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert {{ message.tags }}">
+            <i class="fas fa-bell"></i> 
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+</body>
+</html>

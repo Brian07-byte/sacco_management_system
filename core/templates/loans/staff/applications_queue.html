@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Loan Operations | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    --primary-indigo: #4f46e5;
+    --primary-indigo-soft: #eef2ff;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-600: #475569;
+    --slate-900: #0f172a;
+    --success-emerald: #059669;
+    --warning-amber: #d97706;
+  }
+
+  body { 
+    background-color: #f8fafc; 
+    font-family: 'Inter', sans-serif; 
+    color: var(--slate-900);
+  }
+
+  .sacco-container { padding: 3rem 1.5rem; max-width: 1300px; margin: 0 auto; }
+
+  /* Page Header */
+  .page-header { margin-bottom: 2.5rem; }
+  .page-header h1 { font-weight: 800; letter-spacing: -0.03em; color: var(--slate-900); }
+  
+  /* Stats Grid */
+  .stats-row { display: flex; gap: 1.5rem; margin-bottom: 2rem; }
+  .stat-pill {
+    background: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  /* Table Customization */
+  .sacco-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--slate-200);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  .sacco-table { width: 100%; border-collapse: collapse; }
+  .sacco-table th {
+    background: var(--slate-50);
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--slate-600);
+    border-bottom: 1px solid var(--slate-200);
+  }
+
+  .sacco-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--slate-100); }
+  .sacco-table tr:last-child td { border-bottom: none; }
+  .sacco-table tr:hover { background-color: #fcfdff; }
+
+  /* Member Branding */
+  .member-ref {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-indigo);
+    background: var(--primary-indigo-soft);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  /* Status Chips - High Contrast */
+  .status-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chip-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+  .chip-approved { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; }
+
+  /* Amount Column Color Logic */
+  .amount-pending { color: var(--warning-amber); font-weight: 700; }
+  .amount-approved { color: var(--success-emerald); font-weight: 700; }
+
+  /* Buttons */
+  .btn-review {
+    background: white;
+    border: 1.5px solid var(--slate-200);
+    color: var(--slate-900);
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-review:hover {
+    border-color: var(--primary-indigo);
+    color: var(--primary-indigo);
+    background: var(--primary-indigo-soft);
+  }
+</style>
+
+<div class="sacco-container">
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+      <h1>Loan Applications</h1>
+      <p class="text-muted">Process and manage member credit requests with precision.</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-pill">
+        <i class="bi bi-clock-history text-warning"></i>
+        <div>
+          <small class="d-block text-muted">Awaiting</small>
+          <strong>{{ apps.count }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sacco-card">
+    <div class="table-responsive">
+      <table class="sacco-table">
+        <thead>
+          <tr>
+            <th>Application Date</th>
+            <th>Member Details</th>
+            <th>Loan Product</th>
+            <th class="text-end">Requested Sum</th>
+            <th class="text-center">Workflow Status</th>
+            <th class="text-end">Management</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in apps %}
+          <tr>
+            <td>
+              <div class="fw-bold">{{ a.submitted_at|date:"d M, Y" }}</div>
+              <small class="text-muted">{{ a.submitted_at|timesince }} ago</small>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                <div class="member-ref">{{ a.member.member_number }}</div>
+                <div class="fw-medium">{{ a.member.user.get_full_name }}</div>
+              </div>
+            </td>
+            <td>
+              <span class="text-slate-600 fw-medium">{{ a.product.name }}</span>
+            </td>
+            <td class="text-end">
+              <span class="{% if a.status == 'SUBMITTED' %}amount-pending{% else %}amount-approved{% endif %}">
+                KES {{ a.requested_amount }}
+              </span>
+            </td>
+            <td class="text-center">
+              {% if a.status == 'SUBMITTED' %}
+                <span class="status-chip chip-pending">
+                  <span class="dot bg-warning"></span> Review Required
+                </span>
+              {% elif a.status == 'APPROVED' %}
+                <span class="status-chip chip-approved">
+                  <i class="bi bi-check-lg"></i> Approved
+                </span>
+              {% else %}
+                <span class="status-chip chip-pending">{{ a.status }}</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'loans:application_detail' a.pk %}" class="btn-review">
+                Process <i class="bi bi-arrow-right ms-2"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <i class="bi bi-inbox text-slate-200" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-3">The application queue is currently empty.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

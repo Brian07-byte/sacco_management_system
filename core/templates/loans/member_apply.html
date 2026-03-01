@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Apply for Loan | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    --brand-dark: #0f172a;
+    --brand-primary: #2563eb;
+    --brand-success: #10b981;
+    --surface-100: #f8fafc;
+    --surface-200: #e2e8f0;
+    --text-soft: #64748b;
+  }
+
+  body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    background-color: #f1f5f9; 
+    color: var(--brand-dark);
+  }
+
+  .loan-wrapper {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+  }
+
+  /* Progress Header */
+  .application-header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  /* The "Non-Form" Grid */
+  .interactive-grid {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+
+  .full-width { grid-column: 1 / -1; }
+
+  /* Styling the Django Fields to look like modern Cards */
+  .input-group-custom {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .input-group-custom label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-group-custom input, 
+  .input-group-custom select, 
+  .input-group-custom textarea {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--surface-200);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: var(--surface-100);
+    transition: all 0.2s;
+  }
+
+  .input-group-custom input:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Sidebar Summary */
+  .summary-sidebar {
+    background: var(--brand-dark);
+    color: white;
+    border-radius: 24px;
+    padding: 30px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+  }
+
+  .summary-stat {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .summary-stat .label { color: #94a3b8; font-size: 0.8rem; }
+  .summary-stat .value { font-size: 1.5rem; font-weight: 700; display: block; margin-top: 5px; }
+
+  .btn-apply {
+    background: var(--brand-success);
+    color: white;
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s;
+  }
+
+  .btn-apply:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+  @media (max-width: 900px) {
+    .loan-wrapper { grid-template-columns: 1fr; }
+    .field-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="loan-wrapper">
+  <div class="application-header">
+    <div>
+      <h1 style="font-weight: 800; margin-bottom: 5px;">Loan Application</h1>
+      <p style="color: var(--text-soft);">Step 1 of 3: Digital Request</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <span class="badge" style="background: #dcfce7; color: #166534; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+            <i class="bi bi-shield-check"></i> Secured Encryption
+        </span>
+    </div>
+  </div>
+
+  <div class="interactive-grid">
+    <form method="post" id="loanForm">
+      {% csrf_token %}
+      
+      <div class="field-grid">
+        {% for field in form %}
+          <div class="input-group-custom {% if field.name == 'remarks' or field.name == 'address' %}full-width{% endif %}">
+            <label for="{{ field.id_for_label }}">
+                {% if "amount" in field.label|lower %}<i class="bi bi-cash-stack"></i> {% endif %}
+                {% if "type" in field.label|lower %}<i class="bi bi-tag"></i> {% endif %}
+                {{ field.label }}
+            </label>
+            {{ field }}
+            
+            {% if field.errors %}
+              <div style="color: #ef4444; font-size: 0.75rem; margin-top: 5px;">{{ field.errors.0 }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      
+      <div style="margin-top: 40px; padding: 20px; background: #eff6ff; border-radius: 12px; border-left: 4px solid var(--brand-primary);">
+        <h4 style="margin: 0 0 5px 0; color: var(--brand-primary); font-size: 0.9rem;">Quick Declaration</h4>
+        <p style="margin: 0; font-size: 0.85rem; color: #1e40af;">I certify that the information provided is accurate and I understand that Pamoja SACCO will conduct a credit evaluation based on these details.</p>
+      </div>
+    </form>
+  </div>
+
+  <aside class="summary-sidebar">
+    <h3 style="margin-bottom: 25px; font-size: 1.2rem;">Application Summary</h3>
+    
+    <div class="summary-stat">
+      <span class="label">Product Selected</span>
+      <span class="value" id="summary-type">Personal Loan</span>
+    </div>
+
+    <div class="summary-stat">
+      <span class="label">Estimated Processing</span>
+      <span class="value">24 - 48 Hours</span>
+    </div>
+
+    <div class="summary-stat" style="border: none;">
+      <p style="font-size: 0.75rem; color: #94a3b8; line-height: 1.5;">
+        Our automated system will verify your savings ratio against the requested amount instantly after submission.
+      </p>
+    </div>
+
+    <button type="submit" form="loanForm" class="btn-apply">
+      Submit Request <i class="bi bi-arrow-right"></i>
+    </button>
+  </aside>
+</div>
+
+<script>
+    // Optional: Add some interactivity to update the sidebar as they type
+    const amountInput = document.querySelector('input[name*="amount"]');
+    if(amountInput) {
+        amountInput.addEventListener('input', (e) => {
+            // You could update a 'Repayment' calculation here in real-time
+        });
+    }
+</script>
+{% endblock %}

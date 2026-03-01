@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Charge Policy | Pamoja SACCO{% endblock %}
+{% block content %}
+<style>
+    /* Card Container */
+.card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+h2 {
+    color: #1e293b;
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+/* Form Layout */
+form p {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+/* Inputs (Select, Number, Text) */
+form input, 
+form select, 
+form textarea {
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+}
+
+form input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background-color: #fff;
+}
+
+/* Primary Button */
+.btn-staff-primary {
+    background-color: #2563eb; /* Pamoja Blue */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-staff-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* Help Text (Django's default help_text) */
+.helptext {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+</style>
+<div class="card" style="max-width:860px;margin:20px auto;">
+  <h2>Edit Charge Policy</h2>
+  <p style="color:#64748b;">These charges affect savings withdrawals, deposits, and membership fees.</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn-staff-primary" type="submit">Save Policy</button>
+  </form>
+</div>
+{% endblock %}

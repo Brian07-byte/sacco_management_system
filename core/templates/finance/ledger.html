@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Finance Ledger | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Finance Ledger</h1>
+      <p>Credits: <strong>KES {{ total_credit }}</strong> • Debits: <strong>KES {{ total_debit }}</strong></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+      <div style="min-width:220px;">
+        <label style="font-weight:800;">Account</label>
+        <select name="account" style="width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:10px;">
+          <option value="">All Accounts</option>
+          {% for a in accounts %}
+            <option value="{{ a.id }}" {% if selected_account and selected_account.id == a.id %}selected{% endif %}>
+              {{ a.code }} - {{ a.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="font-weight:800;">Date</label>
+        <input name="date" type="date" value="{% if selected_date %}{{ selected_date|date:'Y-m-d' }}{% endif %}"
+               style="padding:10px; border:1px solid #e5e7eb; border-radius:10px;">
+      </div>
+
+      <button class="btn-staff-primary" type="submit">Filter</button>
+      <a class="btn-staff-outline" href="{% url 'finance:ledger' %}">Reset</a>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account</th>
+            <th>Type</th>
+            <th class="text-right">Amount</th>
+            <th>Narration</th>
+            <th>By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entries %}
+          <tr>
+            <td>{{ e.created_at|date:"Y-m-d H:i" }}</td>
+            <td><strong>{{ e.account.code }}</strong></td>
+            <td>{{ e.entry_type }}</td>
+            <td class="text-right">KES {{ e.amount }}</td>
+            <td>{{ e.narration|default:"-" }}</td>
+            <td>{{ e.created_by.username|default:"System" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6">No entries found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

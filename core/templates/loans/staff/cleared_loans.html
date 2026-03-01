@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Cleared Loans | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-blue: #1a2b4b;
+    --success-green: #059669; /* Slightly deeper green for completed status */
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f9fafb;
+    --border-color: #e5e7eb;
+  }
+
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); }
+
+  .list-container { padding: 3rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+  .list-header {
+    margin-bottom: 2.5rem;
+    padding-left: 1rem;
+    border-left: 4px solid var(--success-green);
+  }
+
+  .header-main h1 { font-size: 1.8rem; font-weight: 700; color: var(--primary-blue); margin: 0; }
+  .header-main p { color: var(--text-muted); margin-top: 4px; }
+
+  /* Table Card Styling */
+  .table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+  }
+
+  .modern-table { width: 100%; border-collapse: collapse; }
+
+  .modern-table th {
+    background-color: #f8fafc;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modern-table td {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    font-size: 0.9rem;
+  }
+
+  /* Member Badge */
+  .member-tag {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--primary-blue);
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  /* Status Badge */
+  .status-cleared {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ecfdf5;
+    color: var(--success-green);
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .text-right { text-align: right; }
+  .text-muted { color: var(--text-muted); }
+  
+  /* Amounts */
+  .amount-box { font-weight: 500; color: var(--text-main); }
+</style>
+
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Cleared Loans</h1>
+      <p>Historical archive of fully settled accounts.</p>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow-x:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Product Details</th>
+            <th class="text-right">Principal</th>
+            <th class="text-right">Total Repaid</th>
+            <th>Final Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in loans %}
+          <tr>
+            <td>
+              <span class="member-tag">{{ l.member.member_number }}</span>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">{{ l.member.user.get_full_name }}</div>
+            </td>
+            <td>
+              <strong style="color: var(--primary-blue);">{{ l.product.name }}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Ref: #{{ l.pk }}</div>
+            </td>
+            <td class="text-right">
+              <span class="amount-box">KES {{ l.principal }}</span>
+            </td>
+            <td class="text-right">
+              <span class="amount-box" style="color: var(--success-green);">KES {{ l.total_payable }}</span>
+            </td>
+            <td>
+              <span class="status-cleared">
+                <svg style="width:14px; height:14px;" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                {{ l.status }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+              <svg style="width:48px; height:48px; opacity: 0.3; margin-bottom: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <p>No loans have been cleared yet.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

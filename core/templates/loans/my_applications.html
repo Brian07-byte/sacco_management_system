@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}My Loan Applications | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-blue: #1a2b4b;
+    --accent-green: #10b981;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f9fafb;
+    --border-color: #e5e7eb;
+  }
+
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); }
+
+  .list-container { padding: 3rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header-main h1 { font-size: 1.8rem; font-weight: 700; color: var(--primary-blue); margin: 0; }
+  .header-main p { color: var(--text-muted); margin-top: 4px; }
+
+  /* New Application Button */
+  .btn-staff-primary {
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+  }
+
+  .btn-staff-primary:hover { background: #0f1a30; transform: translateY(-1px); }
+
+  /* Table Card */
+  .table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+
+  .modern-table { width: 100%; border-collapse: collapse; }
+
+  .modern-table th {
+    background-color: #f8fafc;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modern-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+
+  /* Progress Visualizer */
+  .progress-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 180px;
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-color); }
+  .dot.filled { background: var(--accent-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+  .dot.active { background: #3b82f6; animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  }
+
+  .status-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+
+  .text-right { text-align: right; }
+  .text-muted { color: var(--text-muted); font-size: 0.85rem; }
+</style>
+
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>My Loan Applications</h1>
+      <p>Real-time tracking of your credit requests</p>
+    </div>
+    <div class="header-actions">
+      <a class="btn-staff-primary" href="{% url 'loans:apply' %}">
+        Apply for Loan
+      </a>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow-x:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Submission Date</th>
+            <th>Loan Product</th>
+            <th class="text-right">Requested Amount</th>
+            <th>Duration</th>
+            <th>Approval Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in apps %}
+          <tr>
+            <td>
+              <span class="status-label">{{ a.submitted_at|date:"M d, Y" }}</span><br>
+              <span class="text-muted">Ref: #APP-{{ a.pk }}</span>
+            </td>
+            <td>
+              <strong style="color: var(--primary-blue);">{{ a.product.name }}</strong>
+            </td>
+            <td class="text-right">
+              <span class="status-label">KES {{ a.requested_amount }}</span>
+            </td>
+            <td>
+              <span class="status-label">{{ a.term_months }} Months</span>
+            </td>
+            <td>
+              <div class="progress-track">
+                <div class="dot filled"></div>
+                
+                <div class="dot {% if a.status == 'VERIFIED' or a.status == 'APPROVED' %}filled{% elif a.status == 'SUBMITTED' %}active{% endif %}"></div>
+                
+                <div class="dot {% if a.status == 'APPROVED' %}filled{% elif a.status == 'VERIFIED' %}active{% endif %}"></div>
+                
+                <span class="status-label" style="margin-left: 8px;">
+                    {% if a.status == 'SUBMITTED' %}Under Verification
+                    {% elif a.status == 'VERIFIED' %}Awaiting Manager
+                    {% elif a.status == 'APPROVED' %}Approved
+                    {% else %}{{ a.status }}
+                    {% endif %}
+                </span>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+              You haven't submitted any loan applications yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

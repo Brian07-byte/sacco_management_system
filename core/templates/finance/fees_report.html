@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Fees Report | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Fees & Income Report</h1>
+      <p>
+        {% if start or end %}
+          Range:
+          <strong>{% if start %}{{ start }}{% else %}—{% endif %}</strong>
+          to
+          <strong>{% if end %}{{ end }}{% else %}—{% endif %}</strong>
+        {% else %}
+          Showing recent entries (filter optional)
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+      <div>
+        <label style="font-weight:800;">Start</label>
+        <input name="start" type="date" value="{% if start %}{{ start|date:'Y-m-d' }}{% endif %}"
+               style="padding:10px; border:1px solid #e5e7eb; border-radius:10px;">
+      </div>
+      <div>
+        <label style="font-weight:800;">End</label>
+        <input name="end" type="date" value="{% if end %}{{ end|date:'Y-m-d' }}{% endif %}"
+               style="padding:10px; border:1px solid #e5e7eb; border-radius:10px;">
+      </div>
+      <button class="btn-staff-primary" type="submit">Apply</button>
+      <a class="btn-staff-outline" href="{% url 'finance:fees_report' %}">Reset</a>
+    </form>
+  </div>
+
+  <div class="audit-summary-grid">
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Withdrawal Fees</span>
+      <span class="tile-value">KES {{ total_withdrawal_fees }}</span>
+    </div>
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Membership Fees</span>
+      <span class="tile-value">KES {{ total_membership_fees }}</span>
+    </div>
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Loan Interest</span>
+      <span class="tile-value">KES {{ total_loan_interest }}</span>
+    </div>
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Loan Fees</span>
+      <span class="tile-value">KES {{ total_loan_fees }}</span>
+    </div>
+    <div class="audit-tile tile-net">
+      <span class="tile-label">Grand Total</span>
+      <span class="tile-value">KES {{ grand_total }}</span>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account</th>
+            <th class="text-right">Amount</th>
+            <th>Narration</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ r.created_at|date:"Y-m-d H:i" }}</td>
+            <td><strong>{{ r.account.code }}</strong></td>
+            <td class="text-right">KES {{ r.amount }}</td>
+            <td>{{ r.narration|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No fee entries found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

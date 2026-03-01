@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Savings Transactions | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+/* --- Header Summary --- */
+.header-balance {
+    text-align: right;
+    background: var(--sacco-bg);
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid #d1fae5;
+}
+
+.header-balance .label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--sacco-green);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.header-balance .amount {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--sacco-navy);
+}
+
+/* --- Transaction Specifics --- */
+.date-cell {
+    display: flex;
+    flex-direction: column;
+}
+
+.d-main { font-weight: 700; color: var(--primary); }
+.d-sub { font-size: 0.75rem; color: var(--text-light); }
+
+.txn-type-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.txn-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+/* Colors for Deposit vs Withdrawal */
+.icon-in { background: #ecfdf5; color: #10b981; }  /* Green */
+.icon-out { background: #fff1f2; color: #f43f5e; } /* Red/Pink */
+
+.txn-info .type-name { display: block; font-weight: 700; font-size: 0.95rem; }
+.txn-info .type-category { font-size: 0.75rem; color: var(--text-light); }
+
+.ref-code {
+    font-family: 'Monaco', monospace;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    background: #f8fafc;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Amount Colors */
+.txn-amount { font-weight: 800; font-size: 1rem; }
+.amt-in { color: #059669; }
+.amt-out { color: #e11d48; }
+
+.txn-row:hover {
+    background-color: #f8fafc;
+    cursor: pointer;
+}
+
+/* Status badge */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.st-posted { background: #dcfce7; color: #15803d; }
+.st-pending { background: #fef9c3; color: #854d0e; }
+.st-rejected { background: #fee2e2; color: #b91c1c; }
+
+/* Fee / impact */
+.fee-text {
+    font-weight: 700;
+    color: #0f172a;
+}
+.subtle {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+</style>
+
+<div class="list-container">
+    <div class="list-header">
+        <div class="header-main">
+            <a href="{% url 'savings:my' %}" class="back-link">
+                <i class="fa-solid fa-chevron-left"></i> Back to Savings
+            </a>
+            <h1>Transaction History</h1>
+        </div>
+        <div class="header-balance">
+            <span class="label">Current Balance</span>
+            <span class="amount">KES {{ account.balance }}</span>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Transaction Details</th>
+                        <th>Reference</th>
+                        <th>Status</th>
+                        <th class="text-right">Fee</th>
+                        <th class="text-right">Amount</th>
+                        <th class="text-right">Total Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in txns %}
+                    <tr class="txn-row">
+                        <td class="date-cell">
+                            <span class="d-main">{{ t.created_at|date:"d M Y" }}</span>
+                            <span class="d-sub">{{ t.created_at|time:"H:i" }}</span>
+                        </td>
+
+                        <td>
+                            <div class="txn-type-wrapper">
+                                <div class="txn-icon {% if t.txn_type == 'DEPOSIT' %}icon-in{% else %}icon-out{% endif %}">
+                                    {% if t.txn_type == 'DEPOSIT' %}
+                                        <i class="fa-solid fa-arrow-down-long"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-arrow-up-long"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="txn-info">
+                                    <span class="type-name">{{ t.txn_type|title }}</span>
+                                    <span class="type-category">
+                                        Savings Account
+                                        <span class="subtle">• {{ t.channel|default:"-" }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="ref-code">{{ t.reference|default:"---" }}</span>
+                        </td>
+
+                        <td>
+                            <span class="status-badge
+                                {% if t.status == 'POSTED' %}st-posted{% elif t.status == 'PENDING' %}st-pending{% else %}st-rejected{% endif %}">
+                                {{ t.status }}
+                            </span>
+                        </td>
+
+                        <td class="text-right">
+                            {% if t.txn_type == "WITHDRAWAL" %}
+                                <span class="fee-text">KES {{ t.fee_amount|default:"0.00" }}</span>
+                            {% else %}
+                                <span class="subtle">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-right">
+                            <span class="txn-amount {% if t.txn_type == 'DEPOSIT' %}amt-in{% else %}amt-out{% endif %}">
+                                {% if t.txn_type == 'DEPOSIT' %}+{% else %}-{% endif %}
+                                KES {{ t.amount }}
+                            </span>
+                        </td>
+
+                        <td class="text-right">
+                            {% if t.txn_type == "DEPOSIT" %}
+                                <span class="txn-amount amt-in">+ KES {{ t.amount }}</span>
+                            {% else %}
+                                <span class="txn-amount amt-out">
+                                    - KES {{ t.amount|add:t.fee_amount }}
+                                </span>
+                                <div class="subtle">Amount + Fee</div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fa-solid fa-receipt"></i>
+                            <p>No transactions found for this account.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

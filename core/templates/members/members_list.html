@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Members List | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-header">
+        <div>
+            <h1>Member Directory</h1>
+            <p>Manage and monitor all registered SACCO members.</p>
+        </div>
+        <a class="btn-staff-primary" href="{% url 'members:register' %}">
+            <i class="fa-solid fa-user-plus"></i> Register Member
+        </a>
+    </div>
+
+    <div class="table-controls">
+        <form method="get" class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" placeholder="Search by number, name, or ID..." value="{{ q }}">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Member Number</th>
+                        <th>Member Name</th>
+                        <th>National ID</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                    <tr>
+                        <td>
+                            <span class="member-no-tag">{{ m.member_number }}</span>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <span class="user-name">{{ m.user.get_full_name|default:m.user.username }}</span>
+                                <span class="user-email">{{ m.user.email }}</span>
+                            </div>
+                        </td>
+                        <td>{{ m.national_id }}</td>
+                        <td>
+                            <span class="status-chip status-{{ m.status|lower }}">
+                                {{ m.status }}
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <div class="action-buttons">
+                                <a href="{% url 'members:detail' m.pk %}" class="action-btn view" title="View Details">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{% url 'members:edit' m.pk %}" class="action-btn edit" title="Edit Member">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fa-solid fa-users-slash"></i>
+                            <p>No members found matching your search.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Charge Policy | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:720px; margin:20px auto;">
+  <h2>Charge Policy</h2>
+  <p style="color:#64748b;">These settings control fees charged to members (withdrawals, membership, loan fees).</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn-staff-primary" type="submit">Save Policy</button>
+  </form>
+
+  {% if policy %}
+    <div style="margin-top:14px; font-size:.9rem; color:#64748b;">
+      Last updated: <strong>{{ policy.updated_at|date:"Y-m-d H:i" }}</strong>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

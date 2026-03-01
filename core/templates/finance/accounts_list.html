@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Finance Accounts | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Finance Accounts</h1>
+      <p>Total System Balance: <strong>KES {{ total_balance }}</strong></p>
+    </div>
+    <div class="header-actions">
+      <a class="btn-staff-primary" href="{% url 'finance:ledger' %}">View Ledger</a>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th class="text-right">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in accounts %}
+          <tr>
+            <td><strong>{{ a.code }}</strong></td>
+            <td>{{ a.name }}</td>
+            <td>{{ a.account_type }}</td>
+            <td class="text-right">KES {{ a.balance }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No finance accounts found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

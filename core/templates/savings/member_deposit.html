@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Deposit | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Deposit Page Layout --- */
+    .deposit-wrapper {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-light);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--sacco-navy); }
+
+    /* --- Summary Card --- */
+    .mini-dashboard {
+        display: flex;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .mini-stat { flex: 1; text-align: center; }
+    .mini-stat:first-child { border-right: 1px solid #cbd5e1; }
+    .stat-label { display: block; font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .stat-value { display: block; font-size: 1rem; font-weight: 800; color: var(--sacco-navy); }
+
+    /* --- Visual Instructions --- */
+    .instruction-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .step-item {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+        transition: transform 0.2s;
+    }
+
+    .step-number {
+        background: #ecfdf5;
+        color: var(--sacco-green);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .step-text { font-size: 0.85rem; color: #475569; line-height: 1.5; }
+    .paybill-badge {
+        background: #10b981;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-weight: 700;
+    }
+
+    /* --- Form Styling --- */
+    .auth-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 24px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+    }
+
+    .input-wrapper {
+        position: relative;
+        margin-top: 0.5rem;
+    }
+
+    .input-wrapper i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 12px 12px 12px 45px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .input-wrapper input:focus {
+        border-color: var(--sacco-green);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-deposit {
+        width: 100%;
+        background: var(--sacco-navy);
+        color: white;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 1.5rem;
+        transition: all 0.3s;
+    }
+
+    .btn-deposit:hover {
+        background: #1e40af;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3);
+    }
+
+    .hint-text { font-size: 0.75rem; color: #94a3b8; margin-top: 6px; display: block; }
+
+    @media (max-width: 480px) {
+        .auth-card { padding: 1.5rem; }
+    }
+</style>
+
+<div class="deposit-wrapper">
+    <a href="{% url 'savings:my' %}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to My Savings
+    </a>
+
+    <div class="auth-card">
+        <div class="auth-header" style="text-align: center; margin-bottom: 2rem;">
+            <div style="background: #ecfdf5; color: #10b981; width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">
+                <i class="fa-solid fa-piggy-bank"></i>
+            </div>
+            <h2 style="color: var(--sacco-navy); font-weight: 800; margin-bottom: 0.5rem;">Add Funds</h2>
+            <p style="color: var(--text-light); font-size: 0.9rem;">Submit your transaction details for verification.</p>
+        </div>
+
+        <div class="mini-dashboard">
+            <div class="mini-stat">
+                <span class="stat-label">Account No</span>
+                <span class="stat-value">SAV-{{ account.member.member_number }}</span>
+            </div>
+            <div class="mini-stat">
+                <span class="stat-label">Current Bal</span>
+                <span class="stat-value">KES {{ account.balance }}</span>
+            </div>
+        </div>
+
+        <div class="instruction-steps">
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <div class="step-text">Pay via M-Pesa Paybill <span class="paybill-badge">400200</span> or Bank Transfer.</div>
+            </div>
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <div class="step-text">Copy the <b>Transaction Code</b> (e.g., RJW12345) from your confirmation SMS.</div>
+            </div>
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <div class="step-text">Fill the form below and click submit. We'll verify it within an hour.</div>
+            </div>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="font-weight: 700; font-size: 0.85rem; color: var(--sacco-navy);">DEPOSIT AMOUNT (KES)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-coins"></i>
+                    {{ form.amount }}
+                </div>
+                <span class="hint-text">Minimum deposit: KES 100.00</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-weight: 700; font-size: 0.85rem; color: var(--sacco-navy);">TRANSACTION REFERENCE</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-receipt"></i>
+                    {{ form.reference }}
+                </div>
+                <span class="hint-text">M-Pesa Code or Bank Reference number</span>
+            </div>
+
+            <button class="btn-deposit" type="submit">
+                Submit Request <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">
+            <p style="font-size: 0.85rem; color: var(--text-light);">
+                Need assistance? <a href="#" style="color: var(--sacco-green); font-weight: 700; text-decoration: none;">Chat with Support</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

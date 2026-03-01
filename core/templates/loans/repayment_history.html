@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Repayment History</h2>
+            <p class="text-muted small">Track all your loan payments and their current status.</p>
+        </div>
+        <div class="text-end">
+            <i class="bi bi-clock-history fs-1 text-primary opacity-25"></i>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Date & Ref</th>
+                            <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Loan Details</th>
+                            <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Amount</th>
+                            <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Status</th>
+                            <th class="py-3 text-uppercase fs-xs fw-bold text-muted pe-4">Channel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rep in repayments %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ rep.created_at|date:"d M Y" }}</div>
+                                <div class="text-muted extra-small" style="font-size: 0.75rem;">
+                                    {{ rep.reference }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="d-block fw-semibold text-secondary">
+                                    {{ rep.loan.product.name }}
+                                </span>
+                                <span class="badge bg-light text-dark border extra-small">
+                                    ID: #{{ rep.loan.id }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="fw-bold text-dark">
+                                    KES {{ rep.amount }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if rep.status == "POSTED" %}
+                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Posted
+                                    </span>
+                                {% elif rep.status == "PENDING" %}
+                                    <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3">
+                                        <i class="bi bi-hourglass-split me-1"></i> Pending
+                                    </span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="pe-4">
+                                <div class="d-flex align-items-center">
+                                    {% if rep.channel == "MEMBER" %}
+                                        <i class="bi bi-person-fill text-muted me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-person-badge text-primary me-2"></i>
+                                    {% endif %}
+                                    <span class="small">{{ rep.get_channel_display }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="bi bi-inbox fs-1 text-muted opacity-25"></i>
+                                    <p class="mt-3 text-muted">No repayment records found.</p>
+                                    <a href="{% url 'loans:my_loans' %}" class="btn btn-sm btn-primary">Make a Payment</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional tweaks */
+    .fs-xs { font-size: 0.75rem; letter-spacing: 0.05em; }
+    .bg-success-subtle { background-color: #e1f7ec !important; }
+    .bg-warning-subtle { background-color: #fff8e6 !important; }
+    .bg-danger-subtle { background-color: #fceaea !important; }
+    .table > :not(caption) > * > * { padding: 1rem 0.5rem; }
+    .card { border-radius: 1rem !important; }
+    .extra-small { font-size: 0.8rem; }
+</style>
+{% endblock %}

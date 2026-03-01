@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load savings_extras %}
+{% load static %}
+
+{% block title %}Savings Accounts | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Treasury Stats Tiles --- */
+.stats-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-tile {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 16px;
+    border: 1px solid #eef2f6;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+}
+
+.tile-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.tile-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--sacco-navy);
+}
+
+.tile-link {
+    background: var(--sacco-bg);
+    border-color: #d1fae5;
+    transition: 0.2s;
+    text-decoration: none;
+}
+
+.tile-link:hover {
+    background: #dcfce7;
+    transform: translateY(-2px);
+}
+
+.tile-link .tile-value {
+    color: var(--sacco-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- Table Refinements --- */
+.balance-text {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.fee-text {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-weight: 800;
+    color: #92400e;
+    background: #fffbeb;
+    padding: 3px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.btn-staff-outline {
+    border: 2px solid var(--sacco-navy);
+    color: var(--sacco-navy);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.btn-staff-outline:hover {
+    background: var(--sacco-navy);
+    color: white;
+}
+
+.text-center { text-align: center; }
+
+.status-chip {
+    font-size: 0.75rem;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 999px;
+    display: inline-block;
+    text-transform: uppercase;
+}
+
+.status-active { background:#dcfce7; color:#15803d; }
+.status-suspended { background:#fef9c3; color:#854d0e; }
+.status-exited { background:#fee2e2; color:#b91c1c; }
+</style>
+
+<div class="list-container">
+    <div class="list-header">
+        <div class="header-main">
+            <h1>Savings Administration</h1>
+            <p>Overview of all member balances and treasury status.</p>
+        </div>
+        <div class="header-actions">
+            <a class="btn-staff-primary" href="{% url 'savings:deposit' %}">
+                <i class="fa-solid fa-plus-circle"></i> Record Deposit
+            </a>
+            <a class="btn-staff-outline" href="{% url 'savings:withdraw' %}">
+                <i class="fa-solid fa-minus-circle"></i> Record Withdrawal
+            </a>
+        </div>
+    </div>
+
+    <div class="stats-grid-mini">
+        <div class="stat-tile">
+            <span class="tile-label">Total Sacco Savings</span>
+            <span class="tile-value">KES {{ total_savings|default:"0.00" }}</span>
+        </div>
+
+        <div class="stat-tile">
+            <span class="tile-label">Active Accounts</span>
+            <span class="tile-value">{{ accounts.count }}</span>
+        </div>
+
+        <div class="stat-tile">
+            <span class="tile-label">Fees Collected Today</span>
+            <span class="tile-value">KES {{ fees_today|default:"0.00" }}</span>
+        </div>
+
+        <a href="{% url 'savings:pending' %}" class="stat-tile tile-link">
+            <span class="tile-label">Pending Requests</span>
+            <span class="tile-value"><i class="fa-solid fa-clock"></i> {{ pending_count|default:"0" }}</span>
+        </a>
+
+        <a href="{% url 'savings:daily' %}" class="stat-tile tile-link">
+            <span class="tile-label">Today's Activity</span>
+            <span class="tile-value"><i class="fa-solid fa-arrow-trend-up"></i> View</span>
+        </a>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Member No.</th>
+                        <th>Member Name</th>
+                        <th class="text-right">Account Balance</th>
+                        <th class="text-right">Fees Paid</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in accounts %}
+                    <tr>
+                        <td>
+                            <span class="member-no-tag">{{ a.member.member_number }}</span>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <span class="user-name">{{ a.member.user.get_full_name|default:a.member.user.username }}</span>
+                                <span class="user-email">ID: {{ a.member.national_id }}</span>
+                            </div>
+                        </td>
+                        <td class="text-right">
+                            <span class="balance-text">KES {{ a.balance }}</span>
+                        </td>
+
+                        <td class="text-right">
+                            {% with paid=member_fee_map|get_item:a.member.id %}
+                                {% if paid %}
+                                    <span class="fee-text">KES {{ paid }}</span>
+                                {% else %}
+                                    <span style="color:#94a3b8;">KES 0.00</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if a.member.status == "ACTIVE" %}
+                                <span class="status-chip status-active">Active</span>
+                            {% elif a.member.status == "SUSPENDED" %}
+                                <span class="status-chip status-suspended">Suspended</span>
+                            {% else %}
+                                <span class="status-chip status-exited">Exited</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-right">
+                            <div class="action-buttons">
+                                <a href="" class="action-btn view" title="View Transactions">
+                                    <i class="fa-solid fa-receipt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fa-solid fa-vault"></i>
+                            <p>No savings accounts initialized yet.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

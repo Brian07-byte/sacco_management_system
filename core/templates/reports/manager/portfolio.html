@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Loan Portfolio | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Loan Portfolio Quality</h1>
+      <p>Basic portfolio stats (we’ll add arrears later).</p>
+    </div>
+  </div>
+
+  <div class="audit-summary-grid">
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Active Loans</span>
+      <span class="tile-value">{{ active_count }}</span>
+    </div>
+    <div class="audit-tile tile-net">
+      <span class="tile-label">Active Balance</span>
+      <span class="tile-value">KES {{ active_balance }}</span>
+    </div>
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Cleared Loans</span>
+      <span class="tile-value">{{ cleared_count }}</span>
+    </div>
+    <div class="audit-tile tile-out">
+      <span class="tile-label">Defaulted</span>
+      <span class="tile-value">{{ defaulted_count }}</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

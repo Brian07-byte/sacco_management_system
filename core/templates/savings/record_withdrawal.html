@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Record Withdrawal | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<style>
+    /* Modern SACCO Styling */
+    .withdrawal-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+    }
+
+    .form-header {
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #059669; /* SACCO Green */
+        padding-left: 1rem;
+    }
+
+    .form-header h2 {
+        margin: 0;
+        color: #111827;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .form-header p {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Styling Django's form.as_p output */
+    form p {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.25rem;
+    }
+
+    label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    input, select, textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .btn-submit {
+        width: 100%;
+        background-color: #059669; /* Success Green */
+        color: white;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+        background-color: #047857;
+    }
+
+    .helptext {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+
+    /* Fee info + preview */
+    .fee-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+    }
+
+    .fee-title {
+        font-weight: 800;
+        color: #065f46;
+        margin-bottom: 6px;
+        font-size: 0.9rem;
+    }
+
+    .fee-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.9rem;
+        color: #065f46;
+        padding: 4px 0;
+    }
+
+    .fee-note {
+        font-size: 0.78rem;
+        color: #166534;
+        margin-top: 8px;
+        opacity: 0.9;
+    }
+
+    .fee-preview {
+        background: #fff;
+        border: 1px dashed #86efac;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 10px;
+    }
+
+    .fee-preview .fee-row strong {
+        color: #111827;
+    }
+</style>
+
+<div class="withdrawal-container">
+    <div class="form-header">
+        <h2>Record Withdrawal</h2>
+        <p>The system will deduct <strong>Withdrawal Amount + Fee</strong> automatically.</p>
+    </div>
+
+    <!-- ✅ Fee policy display -->
+    <div class="fee-box">
+        <div class="fee-title">Withdrawal Fee Policy</div>
+
+        <div class="fee-row">
+            <span>Flat Fee</span>
+            <span><strong>KES {{ policy.withdrawal_fee_flat|default:"0.00" }}</strong></span>
+        </div>
+
+        <div class="fee-row">
+            <span>Percent Fee</span>
+            <span><strong>{{ policy.withdrawal_fee_percent|default:"0.00" }}%</strong></span>
+        </div>
+
+        <div class="fee-preview">
+            <div class="fee-row">
+                <span>Estimated Fee</span>
+                <span><strong>KES <span id="feePreview">0.00</span></strong></span>
+            </div>
+            <div class="fee-row">
+                <span>Total Deduction</span>
+                <span><strong>KES <span id="totalDeduction">0.00</span></strong></span>
+            </div>
+        </div>
+
+        <div class="fee-note">
+            Note: Final fee is computed when you submit and the withdrawal is posted.
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div style="color: #dc2626; margin-bottom: 1rem; font-size: 0.9rem;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {{ form.as_p }}
+
+        <button class="btn-submit" type="submit">
+            Confirm & Save Withdrawal
+        </button>
+    </form>
+</div>
+
+<script>
+(function () {
+    // Try to find the amount input field from Django form
+    const amountInput =
+        document.querySelector('input[name="amount"]') ||
+        document.querySelector('#id_amount');
+
+    const feePreview = document.getElementById("feePreview");
+    const totalDeduction = document.getElementById("totalDeduction");
+
+    // Values passed from backend (safe defaults)
+    const flatFee = parseFloat("{{ policy.withdrawal_fee_flat|default:'0.00' }}") || 0;
+    const percentFee = parseFloat("{{ policy.withdrawal_fee_percent|default:'0.00' }}") || 0;
+
+    function round2(n) {
+        return (Math.round(n * 100) / 100).toFixed(2);
+    }
+
+    function updatePreview() {
+        const amount = amountInput ? parseFloat(amountInput.value) : 0;
+        const amt = isNaN(amount) ? 0 : amount;
+
+        const fee = flatFee + (amt * (percentFee / 100));
+        const total = amt + fee;
+
+        feePreview.textContent = round2(fee);
+        totalDeduction.textContent = round2(total);
+    }
+
+    if (amountInput) {
+        amountInput.addEventListener("input", updatePreview);
+        updatePreview();
+    }
+})();
+</script>
+{% endblock %}

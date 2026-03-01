@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Loan Products | Pamoja SACCO{% endblock %}
+{% block content %}
+<style>
+    /* Container for the table */
+.table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Keeps the border-radius clean */
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+/* Header Styling */
+.modern-table thead {
+    background-color: #f8fafc;
+}
+
+.modern-table th {
+    padding: 16px 24px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Row Styling */
+.modern-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+    color: #1e293b;
+}
+
+.modern-table tbody tr:hover {
+    background-color: #fbfcfe;
+}
+
+/* Specialized Cell Formatting */
+.modern-table td strong {
+    color: #0f172a;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* Last Row Fix */
+.modern-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Responsive adjust for smaller screens */
+@media (max-width: 600px) {
+    .modern-table th, .modern-table td {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+}
+</style>
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Loan Products</h1>
+      <p>Loan types available in the SACCO.</p>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div style="overflow:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Interest</th>
+            <th>Term</th>
+            <th>Processing Fee</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td><strong>{{ p.name }}</strong><br><span style="color:#64748b;">{{ p.description }}</span></td>
+            <td>{{ p.interest_rate_percent }}%</td>
+            <td>{{ p.min_term_months }} - {{ p.max_term_months }} months</td>
+            <td>KES {{ p.processing_fee_flat }} + {{ p.processing_fee_percent }}%</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No loan products found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

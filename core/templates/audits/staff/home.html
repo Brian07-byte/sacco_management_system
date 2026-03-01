@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Audit Home | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Audit Dashboard</h1>
+      <p>Today: <strong>{{ today }}</strong> • Total logs: <strong>{{ total_today }}</strong></p>
+    </div>
+    <div class="header-actions">
+      <a class="btn-staff-primary" href="{% url 'audits:logs' %}">Open Audit Logs</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 10px;">Quick Notes</h3>
+    <p style="color:#64748b;margin:0;">
+      This module tracks deposits/withdrawals, approvals, member changes, reports exports, and settings changes.
+    </p>
+  </div>
+</div>
+{% endblock %}

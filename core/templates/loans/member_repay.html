@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Submit Repayment | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-blue: #2563eb;
+        --bg-gray: #f8fafc;
+        --text-dark: #1e293b;
+        --border: #e2e8f0;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-gray); color: var(--text-dark); }
+    .repay-container { max-width: 600px; margin: 50px auto; padding: 0 20px; }
+    .repay-card {
+        background: white; padding: 40px; border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border);
+    }
+    .loan-summary {
+        background: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 30px;
+        border-left: 4px solid var(--primary-blue);
+    }
+    .summary-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+    .summary-value { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); display: block; }
+    
+    label { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; display: block; }
+    input, select, textarea {
+        width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+        font-size: 1rem; margin-bottom: 20px; box-sizing: border-box;
+    }
+    .btn-submit {
+        width: 100%; background: var(--primary-blue); color: white; padding: 14px;
+        border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+</style>
+
+<div class="repay-container">
+    <div class="repay-card">
+        <h2 style="margin-top:0;">Submit Repayment</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Enter your payment details. A staff member will verify the transaction within 24 hours.</p>
+
+        <div class="loan-summary">
+            <span class="summary-label">Current Loan Balance</span>
+            <span class="summary-value">KES {{ loan.balance }}</span>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p style="color: #ef4444; font-size: 0.8rem;">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-submit">Submit Payment Claim</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

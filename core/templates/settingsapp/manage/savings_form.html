@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Savings Product | Pamoja SACCO{% endblock %}
+{% block content %}
+<style>
+    /* Container & Card */
+.card {
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+}
+
+h2 {
+    color: #0f172a;
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    letter-spacing: -0.025em;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 1rem;
+}
+
+/* Django Form Formatting */
+form p {
+    margin-bottom: 1.5rem;
+}
+
+/* Label Styling */
+form label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Input, Select, and Textarea */
+form input[type="text"],
+form input[type="number"],
+form input[type="email"],
+form select,
+form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #1e293b;
+    background-color: #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+form input:focus, 
+form select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Special styling for Checkboxes (Django renders these differently) */
+form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+}
+
+/* Action Button */
+.btn-staff-primary {
+    display: inline-block;
+    width: 100%;
+    background: #0f172a; /* Sophisticated Dark Navy */
+    color: #ffffff;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.2s ease;
+    margin-top: 1rem;
+}
+
+.btn-staff-primary:hover {
+    background: #1e293b;
+}
+
+.btn-staff-primary:active {
+    transform: scale(0.98);
+}
+
+/* Django Help Text & Errors */
+.helptext {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.4rem;
+}
+
+.errorlist {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    padding-left: 0;
+    list-style: none;
+    font-weight: 500;
+}
+</style>
+<div class="card" style="max-width:860px;margin:20px auto;">
+  <h2>{% if mode == "create" %}Create Savings Product{% else %}Edit Savings Product{% endif %}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn-staff-primary" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}

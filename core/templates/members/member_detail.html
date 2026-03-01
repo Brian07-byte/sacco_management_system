@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Member Detail | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-nav">
+        <a href="{% url 'members:list' %}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Back to Directory
+        </a>
+        <div class="nav-actions">
+            <a href="{% url 'members:edit' member.pk %}" class="btn-staff-outline">
+                <i class="fa-solid fa-user-pen"></i> Edit Member
+            </a>
+            <button class="btn-staff-primary">
+                <i class="fa-solid fa-print"></i> Print Statement
+            </button>
+        </div>
+    </div>
+
+    <div class="member-header-card">
+        <div class="header-main">
+            <div class="member-avatar-large">
+                {{ member.user.username|slice:":1"|upper }}
+            </div>
+            <div class="member-meta">
+                <h1>{{ member.user.get_full_name|default:member.user.username }}</h1>
+                <div class="meta-row">
+                    <span class="meta-item"><i class="fa-solid fa-hashtag"></i> {{ member.member_number }}</span>
+                    <span class="meta-item"><i class="fa-solid fa-envelope"></i> {{ member.user.email }}</span>
+                    <span class="meta-item status-badge-{{ member.status|lower }}">{{ member.status }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header-stats">
+            <div class="stat-box">
+                <span class="stat-label">Total Savings</span>
+                <span class="stat-value">KES 0.00</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Active Loans</span>
+                <span class="stat-value">KES 0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-col">
+            <div class="info-card">
+                <div class="card-title"><i class="fa-solid fa-id-card"></i> Identity & KYC</div>
+                <div class="info-list">
+                    <div class="info-item"><span>National ID</span><strong>{{ member.national_id }}</strong></div>
+                    <div class="info-item"><span>KRA PIN</span><strong>{{ member.kra_pin|default:"Not Provided" }}</strong></div>
+                    <div class="info-item"><span>Date of Birth</span><strong>{{ member.date_of_birth|default:"-" }}</strong></div>
+                    <div class="info-item"><span>Gender</span><strong>{{ member.gender|title }}</strong></div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> Contact Information</div>
+                <div class="info-list">
+                    <div class="info-item"><span>Phone</span><strong>{{ member.user.phone_number|default:"-" }}</strong></div>
+                    <div class="info-item"><span>Alt Phone</span><strong>{{ member.alternative_phone|default:"-" }}</strong></div>
+                    <div class="info-item"><span>Address</span><strong>{{ member.address|default:"-" }}</strong></div>
+                    <div class="info-item"><span>Location</span><strong>{{ member.town }}, {{ member.county }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-col">
+            <div class="info-card next-of-kin-card">
+                <div class="card-title"><i class="fa-solid fa-people-group"></i> Next of Kin</div>
+                <div class="info-list">
+                    <div class="info-item"><span>Full Name</span><strong>{{ member.next_of_kin_name|default:"-" }}</strong></div>
+                    <div class="info-item"><span>Relationship</span><strong>{{ member.next_of_kin_relationship|default:"-" }}</strong></div>
+                    <div class="info-item"><span>Phone</span><strong>{{ member.next_of_kin_phone|default:"-" }}</strong></div>
+                </div>
+            </div>
+
+            <div class="info-card info-placeholder">
+                <div class="card-title"><i class="fa-solid fa-vault"></i> Account Summary</div>
+                <div class="placeholder-content">
+                    <i class="fa-solid fa-lock"></i>
+                    <p>Financial modules are currently locked. Complete the Savings & Loan setup to view balances.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

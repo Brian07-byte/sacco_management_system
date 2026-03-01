@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Reports | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="list-container position-relative">
+  <div class="pamoja-watermark">PAMOJA SACCO</div>
+
+  <div class="list-header">
+    <div class="header-main">
+      <h1>Operational Reports</h1>
+      <p>Real-time SACCO performance and member summaries.</p>
+    </div>
+  </div>
+
+  <div class="audit-summary-grid">
+    <div class="audit-tile tile-in">
+      <span class="tile-label">Total SACCO Savings</span>
+      <span class="tile-value text-success">KES {{ total_savings }}</span>
+    </div>
+    
+    <div class="audit-tile tile-net">
+      <span class="tile-label">Active Member Loans</span>
+      <span class="tile-value text-indigo">{{ active_loans }}</span>
+    </div>
+
+    <div class="audit-tile tile-out">
+      <span class="tile-label">Total Outstanding Portfolio</span>
+      <span class="tile-value text-danger">KES {{ loan_balance }}</span>
+    </div>
+  </div>
+
+  <h5 class="section-title text-slate-500 mt-5 mb-3"><i class="bi bi-grid-3x3-gap me-2"></i>Report Categories</h5>
+  <div class="report-navigation-grid">
+    
+    <a href="{% url 'reports:staff_daily' %}" class="report-nav-card shadow-sm border-start-indigo">
+        <div class="nav-card-content">
+            <div class="nav-icon bg-indigo-subtle"><i class="bi bi-calendar-check text-indigo"></i></div>
+            <div>
+                <h3>Daily Activity Log</h3>
+                <p>View today's deposits, withdrawals, and repayments.</p>
+            </div>
+        </div>
+        <i class="bi bi-chevron-right"></i>
+    </a>
+
+    <a href="{% url 'reports:staff_savings_summary' %}" class="report-nav-card shadow-sm border-start-success">
+        <div class="nav-card-content">
+            <div class="nav-icon bg-success-subtle"><i class="bi bi-safe text-success"></i></div>
+            <div>
+                <h3>Savings Summary</h3>
+                <p>Monitor all member savings accounts and balances.</p>
+            </div>
+        </div>
+        <i class="bi bi-chevron-right"></i>
+    </a>
+
+    <a href="{% url 'reports:staff_loans_summary' %}" class="report-nav-card shadow-sm border-start-danger">
+        <div class="nav-card-content">
+            <div class="nav-icon bg-danger-subtle"><i class="bi bi-file-earmark-bar-graph text-danger"></i></div>
+            <div>
+                <h3>Loans Summary</h3>
+                <p>Track loan products, payables, and portfolio health.</p>
+            </div>
+        </div>
+        <i class="bi bi-chevron-right"></i>
+    </a>
+
+  </div>
+</div>
+
+<style>
+    /* Global Styling */
+    .list-container { padding: 40px 20px; background: #f8fafc; min-height: 100vh; }
+
+    .pamoja-watermark {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 8vw; font-weight: 900; color: rgba(0, 0, 0, 0.03);
+        pointer-events: none; z-index: 0; white-space: nowrap;
+    }
+
+    .list-header { margin-bottom: 35px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+    .header-main h1 { color: #1e293b; font-weight: 700; }
+    
+    .section-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Summary Tiles */
+    .audit-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+    .audit-tile {
+        background: #ffffff; padding: 25px; border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-top: 5px solid #cbd5e1;
+    }
+    .tile-in { border-top-color: #10b981; }
+    .tile-net { border-top-color: #4f46e5; }
+    .tile-out { border-top-color: #ef4444; }
+
+    .tile-label { font-size: 0.75rem; font-weight: 700; color: #64748b;  }
+    .tile-value { font-size: 1.6rem; font-weight: 800; display: block; margin-top: 8px; }
+
+    /* Navigation Grid */
+    .report-navigation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
+    
+    .report-nav-card {
+        background: #ffffff; padding: 22px; border-radius: 12px;
+        text-decoration: none; color: inherit; display: flex;
+        justify-content: space-between; align-items: center;
+        transition: all 0.25s ease; border: 1px solid #e2e8f0;
+    }
+    .report-nav-card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1) !important; border-color: #94a3b8; }
+
+    /* Nav Card Accents */
+    .border-start-indigo { border-left: 5px solid #4f46e5; }
+    .border-start-success { border-left: 5px solid #10b981; }
+    .border-start-danger { border-left: 5px solid #ef4444; }
+
+    .nav-card-content { display: flex; align-items: center; gap: 18px; }
+    .nav-card-content h3 { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0; }
+    .nav-card-content p { color: #64748b; margin: 4px 0 0 0; font-size: 0.9rem; }
+
+    /* Icons */
+    .nav-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .bg-indigo-subtle { background-color: #eef2ff; }
+    .bg-success-subtle { background-color: #f0fdf4; }
+    .bg-danger-subtle { background-color: #fef2f2; }
+
+    .text-indigo { color: #4f46e5; }
+    .text-success { color: #10b981; }
+    .text-danger { color: #ef4444; }
+
+    @media (max-width: 500px) { .report-navigation-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

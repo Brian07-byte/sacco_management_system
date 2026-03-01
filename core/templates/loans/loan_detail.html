@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Loan Detail | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-blue: #1a2b4b;
+    --accent-green: #10b981;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f9fafb;
+    --border-color: #e5e7eb;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    line-height: 1.5;
+  }
+
+  .detail-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* Header Section */
+  .detail-header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .loan-title h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 0;
+  }
+
+  .status-pill {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+
+  /* Audit Summary Grid (Fintech Tiles) */
+  .audit-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  .audit-tile {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+  }
+
+  .audit-tile:hover {
+    transform: translateY(-2px);
+  }
+
+  .tile-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin-bottom: 8px;
+  }
+
+  .tile-value {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+  }
+
+  /* Highlight the Balance Tile */
+  .tile-net {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+  }
+
+  .tile-net .tile-label { color: rgba(255,255,255,0.7); }
+  .tile-net .tile-value { color: var(--white); }
+
+  /* Buttons */
+  .btn-staff-primary {
+    display: inline-block;
+    background-color: var(--accent-green);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+  }
+
+  .btn-staff-primary:hover {
+    opacity: 0.9;
+  }
+
+  /* Table Styling */
+  .table-card {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-top: 24px;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+  }
+
+  .modern-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .modern-table th {
+    background: #f8fafc;
+    padding: 12px 24px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  .modern-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+  }
+
+  code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #475569;
+  }
+
+  .text-right { text-align: right; }
+</style>
+
+<div class="detail-container">
+  <div class="detail-header">
+    <div class="loan-title">
+      <h2>{{ loan.product.name }}</h2>
+      <p style="color: var(--text-muted); margin-top: 4px;">
+        ID: #{{ loan.pk }} • Disbursement: <strong>{{ loan.disbursement_status }}</strong>
+      </p>
+    </div>
+    <span class="status-pill">{{ loan.status }}</span>
+  </div>
+
+  <div class="audit-summary-grid">
+    <div class="audit-tile">
+      <span class="tile-label">Principal</span>
+      <span class="tile-value">KES {{ loan.principal }}</span>
+    </div>
+    <div class="audit-tile">
+      <span class="tile-label">Interest Total</span>
+      <span class="tile-value">KES {{ loan.interest_total }}</span>
+    </div>
+    <div class="audit-tile">
+      <span class="tile-label">Fees</span>
+      <span class="tile-value">KES {{ loan.fees_total }}</span>
+    </div>
+    <div class="audit-tile tile-net">
+      <span class="tile-label">Outstanding Balance</span>
+      <span class="tile-value">KES {{ loan.balance }}</span>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 40px;">
+    <a class="btn-staff-primary" href="{% url 'loans:member_repay' loan.pk %}">
+      <svg style="width:18px;height:18px;vertical-align:middle;margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+      Make Repayment
+    </a>
+  </div>
+
+  <div class="table-card">
+    <h3 class="section-title">Recent Repayments</h3>
+    <div style="overflow-x:auto;">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Reference</th>
+            <th class="text-right">Interest</th>
+            <th class="text-right">Principal</th>
+            <th class="text-right">Total Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in repayments %}
+          <tr>
+            <td style="font-weight: 500;">{{ r.created_at|date:"M d, Y" }} <br> <small style="color:var(--text-muted)">{{ r.created_at|date:"H:i" }}</small></td>
+            <td><code>{{ r.reference }}</code></td>
+            <td class="text-right" style="color: var(--text-muted);">{{ r.interest_component }}</td>
+            <td class="text-right" style="color: var(--text-muted);">{{ r.principal_component }}</td>
+            <td class="text-right"><strong style="color: var(--primary-blue);">KES {{ r.amount }}</strong></td>
+            <td>
+                <span style="font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; background: #f1f5f9;">{{ r.status }}</span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              No repayment history found for this loan.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

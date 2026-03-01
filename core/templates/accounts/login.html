@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <a href="{% url 'core:landing' %}" class="back-home">
+        <i class="fa-solid fa-house-chimney"></i>
+        <span>Return Home</span>
+    </a>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Welcome Back</h2>
+            <p>Securely log into your Pamoja account</p>
+        </div>
+
+        {% if form.errors or form.non_field_errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Login Failed</span>
+            </div>
+            <ul class="error-list">
+                <li>Invalid username or password. Please try again.</li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group {% if form.errors %}has-error{% endif %}">
+                <label for="id_username">Username</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" name="username" id="id_username" placeholder="Enter your username" required>
+                </div>
+            </div>
+
+            <div class="form-group {% if form.errors %}has-error{% endif %}">
+                <label for="id_password">Password</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" name="password" id="id_password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button class="btn-auth-success" type="submit">
+                Sign In <i class="fa-solid fa-right-to-bracket"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>New to the SACCO? <a href="{% url 'accounts:signup' %}">Apply for Membership</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

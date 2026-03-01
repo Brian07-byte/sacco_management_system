@@ -1,0 +1,27 @@
+# ===== Django / Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+
+# ===== Virtual Environment =====
+venv/
+env/
+.venv/
+
+# ===== Django files =====
+media/
+staticfiles/
+
+# ===== Environment Variables / Secrets =====
+.env
+*.key
+
+# ===== VS Code =====
+.vscode/
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db

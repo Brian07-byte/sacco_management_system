@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Member | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="staff-container">
+    <div class="staff-nav">
+        <a href="{% url 'members:detail' member.pk %}" class="back-link">
+            <i class="fa-solid fa-chevron-left"></i> Back to Member Dossier
+        </a>
+    </div>
+
+    <div class="auth-card staff-edit-card">
+        <div class="staff-header-compact">
+            <div class="header-info">
+                <span class="staff-badge">Administrator Access</span>
+                <h2>Edit Member Record</h2>
+                <p>Modifying details for: <strong>{{ member.member_number }}</strong> ({{ member.user.get_full_name|default:member.user.username }})</p>
+            </div>
+            <div class="status-indicator">
+                <label>Current Status</label>
+                <span class="status-chip status-{{ member.status|lower }}">{{ member.status }}</span>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Data Integrity Error</span>
+            </div>
+            <p>Please check the fields highlighted in red below.</p>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-grid-layout">
+                <div class="form-column">
+                    <div class="column-title">Account & Identity</div>
+                    {% for field in form %}
+                        {% if field.name in "status,member_number,national_id,kra_pin,gender,date_of_birth" %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid 
+                                    {% if 'status' in field.name %}fa-toggle-on
+                                    {% elif 'id' in field.name %}fa-id-card
+                                    {% elif 'pin' in field.name %}fa-fingerprint
+                                    {% elif 'number' in field.name %}fa-hashtag
+                                    {% else %}fa-user{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                            {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="form-column">
+                    <div class="column-title">Contact & Next of Kin</div>
+                    {% for field in form %}
+                        {% if field.name in "address,town,county,alternative_phone,next_of_kin_name,next_of_kin_phone,next_of_kin_relationship" %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid 
+                                    {% if 'next' in field.name %}fa-people-group
+                                    {% elif 'address' in field.name %}fa-map-location-dot
+                                    {% elif 'phone' in field.name %}fa-phone-flip
+                                    {% else %}fa-location-arrow{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="staff-edit-actions">
+                <button class="btn-staff-primary" type="submit">
+                    <i class="fa-solid fa-floppy-disk"></i> Update Member Record
+                </button>
+                <a href="{% url 'members:detail' member.pk %}" class="btn-staff-cancel">Discard Changes</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

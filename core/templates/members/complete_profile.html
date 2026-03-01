@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Complete Profile | Pamoja SACCO{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper profile-onboarding">
+    <div class="onboarding-steps">
+        <div class="step completed"><i class="fa-solid fa-check"></i> Account</div>
+        <div class="step active"><span>2</span> KYC Details</div>
+    </div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-id-card-clip"></i>
+            </div>
+            <h2>Identity Verification</h2>
+            <p>Please provide your official identification to activate your account.</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="error-container">
+            <div class="error-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Action Required</span>
+            </div>
+            <ul class="error-list">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-section-title">Personal Identity</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.national_id.id_for_label }}">National ID / Passport</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                        {{ form.national_id }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.kra_pin.id_for_label }}">KRA PIN</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-fingerprint"></i>
+                        {{ form.kra_pin }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        {{ form.date_of_birth }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.gender.id_for_label }}">Gender</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        {{ form.gender }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-title">Address & Contact</div>
+            <div class="form-group">
+                <label for="{{ form.address.id_for_label }}">Residential Address</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    {{ form.address }}
+                </div>
+            </div>
+
+            <button class="btn-auth-success" type="submit">
+                Submit for Verification <i class="fa-solid fa-shield-halved"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
