@@ -23,7 +23,6 @@ def _money(v):
     return v if v is not None else Decimal("0.00")
 
 
-@login_required
 def landing(request):
     # You already have landing. Keep your existing landing if you want.
     return render(request, "core/landing.html")
@@ -46,7 +45,7 @@ def dashboard(request):
     if role == "MEMBER":
         member = getattr(user, "member_profile", None)
 
-        # safety: if member profile missing (should not happen)
+        # safety: if member profile missing
         if not member:
             context.update({
                 "member": None,
@@ -69,7 +68,11 @@ def dashboard(request):
 
         total_deposits = _money(posted_txns.filter(txn_type="DEPOSIT").aggregate(t=Sum("amount"))["t"])
         total_withdrawals = _money(posted_txns.filter(txn_type="WITHDRAWAL").aggregate(t=Sum("amount"))["t"])
-        total_fees = _money(posted_txns.aggregate(t=Sum("fee_amount"))["t"])
+        
+        # Comprehensive fee calculation for member (Savings fees + Membership fees if applicable)
+        total_fees = _money(posted_txns.aggregate(
+            t=Sum("fee_amount") + Sum("membership_fee_amount")
+        )["t"])
 
         recent_txns = SavingsTransaction.objects.filter(
             account=savings_account
@@ -85,7 +88,7 @@ def dashboard(request):
             status="POSTED"
         ).order_by("-created_at").first()
 
-        # member audits (optional)
+        # member security audits
         my_security = AuditLog.objects.filter(
             actor=user,
             module__in=["SECURITY", "SYSTEM"],
@@ -93,12 +96,9 @@ def dashboard(request):
         ).order_by("-created_at")[:5]
 
         context.update({
-            # identity
             "member": member,
             "member_number": member.member_number,
             "member_status": getattr(member, "status", "ACTIVE"),
-
-            # savings
             "savings_account": savings_account,
             "savings_balance": savings_balance,
             "total_deposits": total_deposits,
@@ -107,14 +107,10 @@ def dashboard(request):
             "pending_count": pending_txns.count(),
             "pending_txns": pending_txns[:6],
             "recent_txns": recent_txns,
-
-            # loans
             "active_loans_count": active_loans_count,
             "loan_balance_total": loan_balance_total,
             "active_loans": active_loans[:5],
             "last_repayment": last_repayment,
-
-            # security
             "my_security": my_security,
         })
         return render(request, "core/dashboard.html", context)
@@ -122,16 +118,29 @@ def dashboard(request):
     # =========================
     # STAFF (CLERK / MANAGER) DASHBOARD
     # =========================
-    # Common staff numbers (manager also sees these)
-    # Savings today
+    
+    # 1. Savings Activity Today
     todays_savings = SavingsTransaction.objects.filter(
         status="POSTED",
         created_at__date=today
     )
-    today_in = _money(todays_savings.filter(txn_type="DEPOSIT").aggregate(t=Sum("amount"))["t"])
-    today_out = _money(todays_savings.filter(txn_type="WITHDRAWAL").aggregate(t=Sum("amount"))["t"])
-    today_fees = _money(todays_savings.aggregate(t=Sum("fee_amount"))["t"])
-    today_net = (today_in - today_out).quantize(Decimal("0.01"))
+    today_deposit_vol = _money(todays_savings.filter(txn_type="DEPOSIT").aggregate(t=Sum("amount"))["t"])
+    today_withdraw_vol = _money(todays_savings.filter(txn_type="WITHDRAWAL").aggregate(t=Sum("amount"))["t"])
+    
+    # 2. Loan Repayments Today
+    repayments_today = LoanRepayment.objects.filter(status="POSTED", created_at__date=today)
+    today_repayments = _money(repayments_today.aggregate(t=Sum("amount"))["t"])
+
+    # 3. Accurate Fees Calculation (Savings Fees + Membership Fees Collected)
+    savings_fees = _money(todays_savings.aggregate(t=Sum("fee_amount"))["t"])
+    membership_fees = _money(todays_savings.aggregate(t=Sum("membership_fee_amount"))["t"])
+    # Add loan processing fees if they are tracked in today's loan objects
+    today_total_fees = savings_fees + membership_fees
+
+    # 4. Accurate Net Flow
+    # Inflow = Deposits + Repayments + Fees
+    # Outflow = Withdrawals
+    today_net = (today_deposit_vol + today_repayments + today_total_fees - today_withdraw_vol).quantize(Decimal("0.01"))
 
     # Pending queues (Savings)
     pending_savings = SavingsTransaction.objects.select_related(
@@ -143,14 +152,10 @@ def dashboard(request):
     total_members = Member.objects.count()
     active_members = Member.objects.filter(status="ACTIVE").count() if hasattr(Member, "status") else Member.objects.filter(is_active=True).count()
 
-    # Loan stats (basic)
-    active_loans = Loan.objects.filter(status="ACTIVE")
-    active_loans_count = active_loans.count()
-    loan_book_balance = _money(active_loans.aggregate(t=Sum("balance"))["t"])
-
-    # Loan repayments today
-    repayments_today = LoanRepayment.objects.filter(status="POSTED", created_at__date=today)
-    today_repayments = _money(repayments_today.aggregate(t=Sum("amount"))["t"])
+    # Loan stats
+    active_loans_qs = Loan.objects.filter(status="ACTIVE")
+    active_loans_count = active_loans_qs.count()
+    loan_book_balance = _money(active_loans_qs.aggregate(t=Sum("balance"))["t"])
 
     # Recent operational activity
     recent_staff_txns = SavingsTransaction.objects.select_related(
@@ -158,22 +163,17 @@ def dashboard(request):
     ).filter(status="POSTED").order_by("-created_at")[:10]
 
     context.update({
-        # staff totals
         "total_members": total_members,
         "active_members": active_members,
-
-        "today_in": today_in,
-        "today_out": today_out,
+        "today_in": today_deposit_vol,
+        "today_out": today_withdraw_vol,
         "today_net": today_net,
-        "today_fees": today_fees,
+        "today_fees": today_total_fees,
         "today_repayments": today_repayments,
-
         "pending_savings_count": pending_savings_count,
         "pending_savings": pending_savings[:8],
-
         "active_loans_count": active_loans_count,
         "loan_book_balance": loan_book_balance,
-
         "recent_staff_txns": recent_staff_txns,
     })
 
@@ -181,10 +181,8 @@ def dashboard(request):
     # MANAGER EXTRA (FINANCE + AUDIT)
     # =========================
     if role == "MANAGER":
-        # Charge policy quick view
         policy = ChargePolicy.objects.first()
 
-        # Finance balances (SaccoAccount codes you already use)
         def _acct(code, name):
             acc, _ = SaccoAccount.objects.get_or_create(code=code, defaults={"name": name})
             return acc
@@ -201,12 +199,10 @@ def dashboard(request):
 
         context.update({
             "policy": policy,
-
             "fees_income_balance": _money(getattr(fees_income_acc, "balance", Decimal("0.00"))),
             "membership_fees_balance": _money(getattr(membership_fees_acc, "balance", Decimal("0.00"))),
             "loan_fees_balance": _money(getattr(loan_fees_acc, "balance", Decimal("0.00"))),
             "loan_interest_balance": _money(getattr(loan_interest_acc, "balance", Decimal("0.00"))),
-
             "audit_today_count": audit_today_count,
             "approvals_today": approvals_today,
             "recent_audits": AuditLog.objects.select_related("actor", "member").order_by("-created_at")[:10],

@@ -40,6 +40,14 @@ class Member(models.Model):
     address = models.CharField(max_length=255, blank=True)
     town = models.CharField(max_length=120, blank=True)
     county = models.CharField(max_length=120, blank=True)
+    # Change this line temporarily
+    phone_number = models.CharField(
+    max_length=15, 
+    null=True,      # Add this
+    blank=True,     # Add this
+    unique=False,    # Change to False temporarily
+    help_text="Primary mobile number"
+)
     alternative_phone = models.CharField(max_length=15, blank=True)
 
     # Next of kin

@@ -3,102 +3,149 @@
 
 {% block content %}
 <style>
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:18px; }
-.tile { background:#fff; border:1px solid #eef2f6; border-radius:16px; padding:16px; box-shadow: var(--shadow-sm); }
-.label { font-size:.75rem; color:var(--text-light); font-weight:800; text-transform:uppercase; }
-.value { font-size:1.35rem; font-weight:900; color:var(--sacco-navy); margin-top:6px; }
-.sub { margin-top:10px; font-size:.85rem; color:#64748b; }
-.badge { display:inline-block; font-size:.75rem; padding:4px 10px; border-radius:999px; font-weight:900; }
-.b-green{ background:#dcfce7; color:#15803d; }
-.b-amber{ background:#fffbeb; color:#92400e; }
-.table-card{ background:#fff; border:1px solid #eef2f6; border-radius:16px; padding:14px; }
+
+  .tx-amount-display {
+    font-weight: 800;
+}
+
+.amt-credit {
+    color: #10b981; /* Green */
+}
+
+.amt-debit {
+    color: #f59e0b; /* Amber/Orange */
+}
+    /* Professional Layout Enhancements */
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:20px; margin-bottom:24px; }
+    .tile { background:#fff; border:1px solid #eef2f6; border-radius:16px; padding:20px; transition: transform 0.2s; position: relative; overflow: hidden; }
+    .tile:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    
+    .label { font-size:.7rem; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing: 0.5px; }
+    .value { font-size:1.5rem; font-weight:900; color:#1e293b; margin-top:8px; }
+    .sub { margin-top:12px; font-size:.8rem; color:#94a3b8; display: flex; align-items: center; gap: 5px; }
+    
+    /* Indicator Accents */
+    .tile.income-focus { border-left: 4px solid #10b981; }
+    .tile.asset-focus { border-left: 4px solid #3b82f6; }
+    
+    .badge { display:inline-block; font-size:.7rem; padding:4px 10px; border-radius:999px; font-weight:800; }
+    .b-green{ background:#dcfce7; color:#15803d; }
+    .b-blue{ background:#dbeafe; color:#1e40af; }
+    .b-amber{ background:#fffbeb; color:#92400e; }
+    
+    .section-title { font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 30px 0 15px; display: flex; align-items: center; gap: 10px; }
+    .table-card { background:#fff; border:1px solid #eef2f6; border-radius:16px; padding:20px; box-shadow: var(--shadow-sm); }
 </style>
 
 <div class="list-container">
-  <div class="list-header">
-    <div class="header-main">
-      <h1>Finance Dashboard</h1>
-      <p>System money overview (fees + interest + charges). Date: <strong>{{ today }}</strong></p>
-    </div>
-    <div class="header-actions">
-      <a class="btn-staff-outline" href="{% url 'finance:fees_report' %}">Fees Report</a>
-      <a class="btn-staff-primary" href="{% url 'finance:ledger' %}">Ledger</a>
-    </div>
-  </div>
-
-  <div class="grid">
-    <div class="tile">
-      <div class="label">Total System Balance</div>
-      <div class="value">KES {{ total_system_balance }}</div>
-      <div class="sub">Sum of all SACCO internal accounts.</div>
+    <div class="list-header">
+        <div class="header-main">
+            <h1>Finance Executive Summary</h1>
+            <p>Comprehensive audit of system funds, assets, and liabilities. <strong>{{ today }}</strong></p>
+        </div>
+        <div class="header-actions">
+            <a class="btn-staff-outline" href="{% url 'finance:accounts' %}"><i class="fa-solid fa-layer-group"></i> Chart of Accounts</a>
+            <a class="btn-staff-primary" href="{% url 'finance:ledger' %}"><i class="fa-solid fa-book"></i> Full Ledger</a>
+        </div>
     </div>
 
-    <div class="tile">
-      <div class="label">Total Income Today</div>
-      <div class="value">KES {{ total_income_today }}</div>
-      <div class="sub"><span class="badge b-green">CREDITS</span> all fee/interest accounts today.</div>
+    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Liquidity & Position</div>
+    <div class="grid">
+        <div class="tile asset-focus">
+            <div class="label">Total System Assets</div>
+            <div class="value">KES {{ total_system_balance }}</div>
+            <div class="sub"><span class="badge b-blue">Active</span> Total cash in internal accounts</div>
+        </div>
+
+        <div class="tile income-focus">
+            <div class="label">Total Revenue Today</div>
+            <div class="value">KES {{ total_income_today }}</div>
+            <div class="sub"><span class="badge b-green">+ {{ total_income_today|default:"0" }}</span> All income streams today</div>
+        </div>
+
+        <div class="tile">
+            <div class="label">Active Income Accounts</div>
+            <div class="value">4 Stream(s)</div>
+            <div class="sub">Fees, Interest, Penalty, Processing</div>
+        </div>
     </div>
 
-    <div class="tile">
-      <div class="label">Withdrawal Fees Today</div>
-      <div class="value">KES {{ fees_today }}</div>
-      <div class="sub">Account: <strong>{{ fees_income.code }}</strong></div>
+    <div class="section-title"><i class="fa-solid fa-money-bill-trend-up"></i> Today's Income Streams</div>
+    <div class="grid">
+        <div class="tile">
+            <div class="label">Withdrawal Fees</div>
+            <div class="value" style="color: #10b981;">KES {{ fees_today }}</div>
+            <div class="sub">Account: <strong>{{ fees_income.code }}</strong></div>
+        </div>
+
+        <div class="tile">
+            <div class="label">Membership Fees</div>
+            <div class="value" style="color: #10b981;">KES {{ membership_today }}</div>
+            <div class="sub">Account: <strong>{{ membership_fees.code }}</strong></div>
+        </div>
+
+        <div class="tile">
+            <div class="label">Loan Interest</div>
+            <div class="value" style="color: #10b981;">KES {{ loan_interest_today }}</div>
+            <div class="sub">Account: <strong>{{ loan_interest.code }}</strong></div>
+        </div>
+
+        <div class="tile">
+            <div class="label">Processing Fees</div>
+            <div class="value" style="color: #10b981;">KES {{ loan_fees_today }}</div>
+            <div class="sub">Account: <strong>{{ loan_fees.code }}</strong></div>
+        </div>
     </div>
 
-    <div class="tile">
-      <div class="label">Membership Fees Today</div>
-      <div class="value">KES {{ membership_today }}</div>
-      <div class="sub">Account: <strong>{{ membership_fees.code }}</strong></div>
+    <div class="section-title"><i class="fa-solid fa-list-check"></i> Recent Financial Activity</div>
+    <div class="table-card">
+        <div style="overflow:auto;">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Account Reference</th>
+                        <th>Transaction Type</th>
+                        <th class="text-right">Amount</th>
+                        <th>Narration / Trail</th>
+                        <th>Operator</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in latest_entries %}
+                    <tr>
+                        <td><span style="color: #64748b;">{{ e.created_at|date:"H:i" }}</span> <small>{{ e.created_at|date:"d M" }}</small></td>
+                        <td>
+                            <div style="display: flex; flex-direction: column;">
+                                <strong>{{ e.account.name }}</strong>
+                                <small style="color: #94a3b8;">{{ e.account.code }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            {% if e.entry_type == "CREDIT" %}
+                                <span class="badge b-green"><i class="fa-solid fa-arrow-trend-up"></i> CREDIT</span>
+                            {% else %}
+                                <span class="badge b-amber"><i class="fa-solid fa-arrow-trend-down"></i> DEBIT</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+    <span class="tx-amount-display {% if e.entry_type == 'CREDIT' %}amt-credit{% else %}amt-debit{% endif %}">
+        KES {{ e.amount }}
+    </span>
+</td>
+                        <td><small>{{ e.narration|default:"System Transaction" }}</small></td>
+                        <td>
+                            <div class="badge" style="background: #f1f5f9; color: #475569;">
+                                {{ e.created_by.get_full_name|default:e.created_by.username|default:"System" }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center" style="padding: 40px; color: #94a3b8;">No movements recorded in the ledger.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <div class="tile">
-      <div class="label">Loan Interest Today</div>
-      <div class="value">KES {{ loan_interest_today }}</div>
-      <div class="sub">Account: <strong>{{ loan_interest.code }}</strong></div>
-    </div>
-
-    <div class="tile">
-      <div class="label">Loan Fees Today</div>
-      <div class="value">KES {{ loan_fees_today }}</div>
-      <div class="sub">Account: <strong>{{ loan_fees.code }}</strong></div>
-    </div>
-  </div>
-
-  <div class="table-card">
-    <h3 style="margin:0 0 10px;">Latest Ledger Entries</h3>
-    <div style="overflow:auto;">
-      <table class="modern-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Account</th>
-            <th>Type</th>
-            <th class="text-right">Amount</th>
-            <th>Narration</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for e in latest_entries %}
-          <tr>
-            <td>{{ e.created_at|date:"Y-m-d H:i" }}</td>
-            <td><strong>{{ e.account.code }}</strong></td>
-            <td>
-              {% if e.entry_type == "CREDIT" %}
-                <span class="badge b-green">CREDIT</span>
-              {% else %}
-                <span class="badge b-amber">DEBIT</span>
-              {% endif %}
-            </td>
-            <td class="text-right">KES {{ e.amount }}</td>
-            <td>{{ e.narration|default:"-" }}</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="5">No ledger entries yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
 </div>
 {% endblock %}

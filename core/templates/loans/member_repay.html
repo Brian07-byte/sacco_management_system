@@ -2,63 +2,197 @@
 {% block title %}Submit Repayment | Pamoja SACCO{% endblock %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
-        --primary-blue: #2563eb;
-        --bg-gray: #f8fafc;
-        --text-dark: #1e293b;
-        --border: #e2e8f0;
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --success: #10b981;
+        --bg-main: #fcfdfe;
+        --slate-800: #1e293b;
+        --slate-500: #64748b;
+        --slate-200: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg-gray); color: var(--text-dark); }
-    .repay-container { max-width: 600px; margin: 50px auto; padding: 0 20px; }
+
+    body { 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+        background-color: var(--bg-main); 
+        color: var(--slate-800);
+    }
+
+    .repay-container { 
+        max-width: 550px; 
+        margin: 60px auto; 
+        padding: 0 20px; 
+    }
+
     .repay-card {
-        background: white; padding: 40px; border-radius: 16px;
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border);
+        background: white; 
+        padding: 40px; 
+        border-radius: 24px;
+        box-shadow: var(--shadow); 
+        border: 1px solid var(--slate-200);
     }
+
+    /* Header Styling */
+    .form-header h2 { 
+        font-weight: 800; 
+        font-size: 1.75rem; 
+        letter-spacing: -0.025em;
+        margin-bottom: 8px;
+    }
+
+    .form-header p { 
+        color: var(--slate-500); 
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+        line-height: 1.5;
+    }
+
+    /* Enhanced Loan Summary */
     .loan-summary {
-        background: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 30px;
-        border-left: 4px solid var(--primary-blue);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 24px; 
+        border-radius: 16px; 
+        margin-bottom: 32px;
+        border: 1px solid var(--slate-200);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-    .summary-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-    .summary-value { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); display: block; }
     
-    label { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; display: block; }
+    .summary-info { display: flex; flex-direction: column; }
+    .summary-label { 
+        font-size: 0.7rem; 
+        font-weight: 800; 
+        color: var(--slate-500); 
+        text-transform: uppercase; 
+        letter-spacing: 0.05em;
+    }
+    .summary-value { 
+        font-size: 1.5rem; 
+        font-weight: 800; 
+        color: var(--primary); 
+    }
+    .status-pill {
+        background: #dcfce7;
+        color: #15803d;
+        padding: 6px 12px;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    /* Form Elements */
+    .form-group { margin-bottom: 24px; position: relative; }
+    
+    label { 
+        font-weight: 700; 
+        font-size: 0.85rem; 
+        margin-bottom: 8px; 
+        display: block;
+        color: var(--slate-800);
+    }
+
     input, select, textarea {
-        width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
-        font-size: 1rem; margin-bottom: 20px; box-sizing: border-box;
+        width: 100%; 
+        padding: 14px 16px; 
+        border: 2px solid var(--slate-200); 
+        border-radius: 12px;
+        font-size: 1rem; 
+        font-weight: 500;
+        transition: all 0.2s ease;
+        background: #fff;
     }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Button Styling */
     .btn-submit {
-        width: 100%; background: var(--primary-blue); color: white; padding: 14px;
-        border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
+        width: 100%; 
+        background: var(--primary); 
+        color: white; 
+        padding: 16px;
+        border: none; 
+        border-radius: 14px; 
+        font-weight: 700; 
+        font-size: 1rem;
+        cursor: pointer; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
     }
-    .btn-submit:hover { opacity: 0.9; }
+
+    .btn-submit:hover { 
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    .input-error { color: #ef4444; font-size: 0.8rem; font-weight: 600; margin-top: 6px; }
+
+    /* Icons and Details */
+    .secure-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 24px;
+        font-size: 0.8rem;
+        color: var(--slate-500);
+        font-weight: 500;
+    }
 </style>
 
 <div class="repay-container">
     <div class="repay-card">
-        <h2 style="margin-top:0;">Submit Repayment</h2>
-        <p style="color: #64748b; margin-bottom: 25px;">Enter your payment details. A staff member will verify the transaction within 24 hours.</p>
+        <div class="form-header">
+            <h2>Submit Repayment</h2>
+            <p>Upload your transaction details below for verification by our finance team.</p>
+        </div>
 
         <div class="loan-summary">
-            <span class="summary-label">Current Loan Balance</span>
-            <span class="summary-value">KES {{ loan.balance }}</span>
+            <div class="summary-info">
+                <span class="summary-label">Outstanding Balance</span>
+                <span class="summary-value">KES {{ loan.balance }}</span>
+            </div>
+            <span class="status-pill">Active Loan</span>
         </div>
 
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
-                <div>
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
                     {{ field }}
                     {% if field.errors %}
-                        <p style="color: #ef4444; font-size: 0.8rem;">{{ field.errors.0 }}</p>
+                        <p class="input-error"><i class="fa-solid fa-circle-exclamation"></i> {{ field.errors.0 }}</p>
                     {% endif %}
                 </div>
             {% endfor %}
-            <button type="submit" class="btn-submit">Submit Payment Claim</button>
+            
+            <button type="submit" class="btn-submit">
+                Submit Payment Claim <i class="fa-solid fa-paper-plane"></i>
+            </button>
         </form>
+
+        <div class="secure-note">
+            <i class="fa-solid fa-shield-halved"></i>
+            End-to-end encrypted verification process
+        </div>
     </div>
 </div>
 {% endblock %}

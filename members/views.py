@@ -59,24 +59,18 @@ def my_profile(request):
 
 
 @member_required
-def complete_profile(request):
+@login_required
+def complete_profile_view(request):
     member = request.user.member_profile
-
-    # If already completed, send them to profile
-    if member.national_id:
-        messages.info(request, "Your profile is already complete.")
-        return redirect("members:my_profile")
-
-    form = MemberCompleteProfileForm(request.POST or None, instance=member)
-
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profile completed successfully.")
-            return redirect("core:dashboard")
-        messages.error(request, "Please correct the errors below.")
-
-    return render(request, "members/complete_profile.html", {"form": form})
+    if request.method == 'POST':
+        form = MemberCompleteProfileForm(request.POST, instance=member)
+        if form.save():
+            messages.success(request, "Profile updated successfully! Your account is now active.")
+            return redirect('members:my_profile')
+    else:
+        form = MemberCompleteProfileForm(instance=member)
+    
+    return render(request, 'members/complete_profile.html', {'form': form})
 
 
 @member_required

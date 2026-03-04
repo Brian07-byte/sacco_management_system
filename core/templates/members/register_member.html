@@ -8,7 +8,7 @@
     <div class="staff-header">
         <div class="staff-badge"><i class="fa-solid fa-user-shield"></i> Staff Portal</div>
         <h1>New Member Registration</h1>
-        <p>Complete all mandatory fields to initialize a new member account and profile.</p>
+        <p>Initialize a new member account. The system will automatically generate a unique Member Number upon saving.</p>
     </div>
 
     <div class="auth-card staff-card">
@@ -24,6 +24,9 @@
                         <li><strong>{{ field.label }}:</strong> {{ error }}</li>
                     {% endfor %}
                 {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
             </ul>
         </div>
         {% endif %}
@@ -36,30 +39,59 @@
                 <h3>System Credentials</h3>
             </div>
             <div class="form-grid">
-                {% for field in form %}
-                    {% if field.name in "user,username,email,member_number" %}
-                        <div class="form-group">
-                            <label>{{ field.label }}</label>
-                            <div class="input-with-icon">
-                                <i class="fa-solid {% if 'user' in field.name %}fa-user-circle{% elif 'email' in field.name %}fa-envelope{% else %}fa-hashtag{% endif %}"></i>
-                                {{ field }}
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Username</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-user-tag"></i>
+                        {{ form.username }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        {{ form.email }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        {{ form.password1 }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-shield-keyhole"></i>
+                        {{ form.password2 }}
+                    </div>
+                </div>
+                
+                </div>
 
             <div class="form-section-header">
                 <div class="section-num">2</div>
                 <h3>Identity & KYC Details</h3>
             </div>
             <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.national_id.id_for_label }}">National ID</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                        {{ form.national_id }}
+                    </div>
+                </div>
+
                 {% for field in form %}
-                    {% if field.name in "national_id,kra_pin,date_of_birth,gender" %}
+                    {% if field.name in "kra_pin,date_of_birth,gender" %}
                         <div class="form-group">
-                            <label>{{ field.label }}</label>
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                             <div class="input-with-icon">
-                                <i class="fa-solid {% if 'id' in field.name %}fa-id-card{% elif 'pin' in field.name %}fa-fingerprint{% elif 'date' in field.name %}fa-calendar{% else %}fa-venus-mars{% endif %}"></i>
+                                <i class="fa-solid {% if 'pin' in field.name %}fa-fingerprint{% elif 'date' in field.name %}fa-calendar{% else %}fa-venus-mars{% endif %}"></i>
                                 {{ field }}
                             </div>
                         </div>
@@ -75,7 +107,7 @@
                 {% for field in form %}
                     {% if field.name in "address,town,county,alternative_phone" %}
                         <div class="form-group">
-                            <label>{{ field.label }}</label>
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                             <div class="input-with-icon">
                                 <i class="fa-solid {% if 'address' in field.name %}fa-map-location-dot{% elif 'town' in field.name %}fa-city{% elif 'county' in field.name %}fa-map{% else %}fa-phone{% endif %}"></i>
                                 {{ field }}
@@ -89,7 +121,9 @@
                 <button class="btn-staff-primary" type="submit">
                     <i class="fa-solid fa-user-plus"></i> Finalize Registration
                 </button>
-                <a href="#" class="btn-staff-link">Clear Form</a>
+                <button type="reset" class="btn-staff-link" style="background:none; border:none; cursor:pointer; color: var(--text-muted); font-weight:600;">
+                    Clear Form
+                </button>
             </div>
         </form>
     </div>

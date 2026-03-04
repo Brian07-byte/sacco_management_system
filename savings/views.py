@@ -307,37 +307,48 @@ def record_withdrawal(request):
     return render(request, "savings/record_withdrawal.html", {"form": form})
 
 
-from finance.models import SaccoLedgerEntry, SaccoAccount
-
-@staff_required
 def daily_transactions(request):
+    # Use localdate to match the Kenyan timezone configuration
     today = timezone.localdate()
 
+    # Optimized Query: Select related to reduce DB hits
+    # We check for 'POSTED' or 'SUCCESSFUL' to be safe
     txns = SavingsTransaction.objects.select_related(
         "account", "account__member", "account__member__user"
     ).filter(
-        created_at__date=today,
-        status="POSTED"
+        created_at__date=today
+    ).filter(
+        Q(status="POSTED") | Q(status="SUCCESSFUL")
     ).order_by("-created_at")
 
-    total_in = txns.filter(txn_type="DEPOSIT").aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
-    total_out = txns.filter(txn_type="WITHDRAWAL").aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
+    # Aggregations
+    total_in = txns.filter(txn_type="DEPOSIT").aggregate(
+        total=Sum("amount"))["total"] or Decimal("0.00")
+    total_out = txns.filter(txn_type="WITHDRAWAL").aggregate(
+        total=Sum("amount"))["total"] or Decimal("0.00")
     net_flow = total_in - total_out
 
-    closing_balance = SavingsAccount.objects.aggregate(total=models.Sum("balance"))["total"] or Decimal("0.00")
+    # Total liquidity in the system
+    closing_balance = SavingsAccount.objects.aggregate(
+        total=Sum("balance"))["total"] or Decimal("0.00")
 
-    # Fees collected today (system income)
-    fees_account = SaccoAccount.objects.filter(code="FEES_INCOME").first()
+    # System Revenue (Fees) Logic
+    # We search case-insensitively for the account code
+    fees_account = SaccoAccount.objects.filter(code__iexact="FEES_INCOME").first()
+    
     if fees_account:
         fees_today = SaccoLedgerEntry.objects.filter(
             account=fees_account,
             entry_type="CREDIT",
             created_at__date=today
-        ).aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
+        ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
     else:
-        fees_today = Decimal("0.00")
+        # Fallback: Sum fee fields from the transactions themselves if ledger is empty
+        fees_today = txns.aggregate(
+            total=Sum(models.F("fee_amount") + models.F("membership_fee_amount"))
+        )["total"] or Decimal("0.00")
 
-    return render(request, "savings/daily_transactions.html", {
+    context = {
         "today": today,
         "txns": txns,
         "total_in": total_in,
@@ -345,7 +356,8 @@ def daily_transactions(request):
         "net_flow": net_flow,
         "closing_balance": closing_balance,
         "fees_today": fees_today,
-    })
+    }
+    return render(request, "savings/daily_transactions.html", context)
 
 # ---------------- STAFF APPROVAL QUEUE ----------------
 @staff_required

@@ -1,91 +1,242 @@
 {% extends "base.html" %}
-{% load static %}
-
-{% block title %}Complete Profile | Pamoja SACCO{% endblock %}
+{% block title %}Complete Your Profile{% endblock %}
 
 {% block content %}
-<div class="auth-wrapper profile-onboarding">
-    <div class="onboarding-steps">
-        <div class="step completed"><i class="fa-solid fa-check"></i> Account</div>
-        <div class="step active"><span>2</span> KYC Details</div>
+<style>
+    /* Container & Card */
+.auth-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h1 {
+    color: #1a202c;
+    font-size: 1.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    color: #718096;
+}
+
+.auth-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+/* Section Styling */
+.form-section { 
+    margin-bottom: 3rem; 
+}
+
+.section-title { 
+    font-size: 1.1rem; 
+    font-weight: 700;
+    color: #2d3748; /* Darker for better readability */
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 10px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-title i {
+    color: #3182ce; /* Primary Blue */
+}
+
+/* Form Elements */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* Targeting Django's default input rendering */
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+    background-color: #fff;
+}
+
+.full-width { 
+    grid-column: span 2; 
+}
+
+/* Actions */
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #edf2f7;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-auth-success {
+    background-color: #38a169; /* Success Green */
+    color: white;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-auth-success:hover {
+    background-color: #2f855a;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .form-grid { 
+        grid-template-columns: 1fr; 
+    }
+    .full-width { 
+        grid-column: span 1; 
+    }
+    .auth-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+<div class="auth-container">
+    <div class="auth-header">
+        <h1>Verify Your Identity</h1>
+        <p>Please provide your KYC details to activate your Pamoja SACCO account.</p>
     </div>
 
     <div class="auth-card">
-        <div class="auth-header">
-            <div class="auth-icon-circle">
-                <i class="fa-solid fa-id-card-clip"></i>
-            </div>
-            <h2>Identity Verification</h2>
-            <p>Please provide your official identification to activate your account.</p>
-        </div>
-
-        {% if form.errors %}
-        <div class="error-container">
-            <div class="error-header">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>Action Required</span>
-            </div>
-            <ul class="error-list">
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-
-        <form method="post" novalidate>
+        <form method="post" class="onboarding-form">
             {% csrf_token %}
-            
-            <div class="form-section-title">Personal Identity</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="{{ form.national_id.id_for_label }}">National ID / Passport</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-id-card"></i>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fa-solid fa-id-card"></i> Identity & Contact</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="form-group">
+                        <label>National ID / Passport</label>
                         {{ form.national_id }}
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.kra_pin.id_for_label }}">KRA PIN</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-fingerprint"></i>
+                    <div class="form-group">
+                        <label>KRA PIN</label>
                         {{ form.kra_pin }}
                     </div>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-calendar-day"></i>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
                         {{ form.date_of_birth }}
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.gender.id_for_label }}">Gender</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-venus-mars"></i>
+                    <div class="form-group">
+                        <label>Gender</label>
                         {{ form.gender }}
                     </div>
                 </div>
             </div>
 
-            <div class="form-section-title">Address & Contact</div>
-            <div class="form-group">
-                <label for="{{ form.address.id_for_label }}">Residential Address</label>
-                <div class="input-with-icon">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                    {{ form.address }}
+            <div class="form-section">
+                <h3 class="section-title"><i class="fa-solid fa-map-location-dot"></i> Physical Address</h3>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Residential Address</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="form-group">
+                        <label>Town/City</label>
+                        {{ form.town }}
+                    </div>
+                    <div class="form-group">
+                        <label>County</label>
+                        {{ form.county }}
+                    </div>
                 </div>
             </div>
 
-            <button class="btn-auth-success" type="submit">
-                Submit for Verification <i class="fa-solid fa-shield-halved"></i>
-            </button>
+            <div class="form-section">
+                <h3 class="section-title"><i class="fa-solid fa-users-rays"></i> Next of Kin</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        {{ form.next_of_kin_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>Relationship</label>
+                        {{ form.next_of_kin_relationship }}
+                    </div>
+                    <div class="form-group">
+                        <label>Kin Phone Number</label>
+                        {{ form.next_of_kin_phone }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-auth-success">Save & Activate Account</button>
+            </div>
         </form>
     </div>
 </div>
+
+<style>
+    .form-section { margin-bottom: 2.5rem; }
+    .section-title { 
+        font-size: 1.1rem; 
+        color: var(--primary); 
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    .full-width { grid-column: span 2; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+</style>
 {% endblock %}

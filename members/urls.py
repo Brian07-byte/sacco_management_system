@@ -6,7 +6,7 @@ app_name = "members"
 urlpatterns = [
     # Member self-service
     path("my-profile/", views.my_profile, name="my_profile"),
-    path("complete-profile/", views.complete_profile, name="complete_profile"),
+    path("complete-profile/", views.complete_profile_view, name="complete_profile"),
     path("edit-profile/", views.edit_profile, name="edit_profile"),
 
     # Staff operations

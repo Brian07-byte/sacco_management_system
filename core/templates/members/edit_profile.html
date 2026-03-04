@@ -33,6 +33,7 @@
         <form method="post" novalidate>
             {% csrf_token %}
             
+            {% if form.national_id or form.kra_pin %}
             <div class="form-section-title">KYC & Personal Details</div>
             <div class="form-grid">
                 {% for field in form %}
@@ -52,11 +53,12 @@
                     {% endif %}
                 {% endfor %}
             </div>
+            {% endif %}
 
-            <div class="form-section-title">Address & Location</div>
+            <div class="form-section-title">Address & Contact Information</div>
             <div class="form-grid">
                  {% for field in form %}
-                    {% if field.name in "address,town,county,alternative_phone" %}
+                    {% if field.name in "phone_number,alternative_phone,address,town,county" %}
                         <div class="form-group {% if field.errors %}has-error{% endif %}">
                             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                             <div class="input-with-icon">
@@ -64,35 +66,40 @@
                                     {% if 'address' in field.name %}fa-map-location-dot
                                     {% elif 'town' in field.name %}fa-city
                                     {% elif 'county' in field.name %}fa-map
+                                    {% elif 'phone_number' == field.name %}fa-phone
                                     {% else %}fa-phone-flip{% endif %}"></i>
                                 {{ field }}
                             </div>
+                            {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
 
             <div class="form-section-title">Next of Kin (Emergency Contact)</div>
-            {% for field in form %}
-                {% if "next_of_kin" in field.name %}
-                    <div class="form-group {% if field.errors %}has-error{% endif %}">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid 
-                                {% if 'name' in field.name %}fa-user-shield
-                                {% elif 'phone' in field.name %}fa-mobile-retro
-                                {% else %}fa-people-arrows{% endif %}"></i>
-                            {{ field }}
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if "next_of_kin" in field.name %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid 
+                                    {% if 'name' in field.name %}fa-user-shield
+                                    {% elif 'phone' in field.name %}fa-mobile-retro
+                                    {% else %}fa-people-arrows{% endif %}"></i>
+                                {{ field }}
+                            </div>
+                            {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
                         </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
 
             <div class="edit-actions">
                 <button class="btn-auth-success" type="submit">
                     Save Changes <i class="fa-solid fa-cloud-arrow-up"></i>
                 </button>
-                <a href="" class="btn-cancel">Cancel</a>
+                <a href="{% url 'members:my_profile' %}" class="btn-cancel">Cancel</a>
             </div>
         </form>
     </div>

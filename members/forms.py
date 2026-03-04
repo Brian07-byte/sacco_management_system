@@ -5,23 +5,24 @@ from .models import Member
 User = get_user_model()
 
 
+# members/forms.py
 class MemberCompleteProfileForm(forms.ModelForm):
-    """For members to complete their own KYC/profile after signup."""
     class Meta:
         model = Member
         fields = [
-            "national_id", "kra_pin", "date_of_birth", "gender",
+            "phone_number", "national_id", "kra_pin", "date_of_birth", "gender",
             "address", "town", "county", "alternative_phone",
             "next_of_kin_name", "next_of_kin_phone", "next_of_kin_relationship",
         ]
-
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+        }
 
 class MemberEditProfileForm(forms.ModelForm):
-    """For members to edit allowed fields only."""
     class Meta:
         model = Member
         fields = [
-            "address", "town", "county", "alternative_phone",
+            "phone_number", "address", "town", "county", "alternative_phone",
             "next_of_kin_name", "next_of_kin_phone", "next_of_kin_relationship",
         ]
 

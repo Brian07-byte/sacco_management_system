@@ -9,6 +9,33 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <style>
+    /* Quick style update for better message visibility */
+    .messages {
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+      animation: slideIn 0.3s ease-out;
+    }
+    .alert.success { background-color: #ecfdf5; color: #059669; border: 1px solid #10b981; }
+    .alert.error { background-color: #fef2f2; color: #dc2626; border: 1px solid #ef4444; }
+    .alert.info { background-color: #eff6ff; color: #2563eb; border: 1px solid #3b82f6; }
+    .alert.warning { background-color: #fffbeb; color: #d97706; border: 1px solid #f59e0b; }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
 </head>
 <body>
 
@@ -29,12 +56,10 @@
             {% if user.role == "MEMBER" %}
               <a href="{% url 'members:my_profile' %}"><i class="fas fa-user-circle"></i> My Profile</a>
               <a href="{% url 'members:edit_profile' %}"><i class="fas fa-user-pen"></i> Edit Profile</a>
-              <a href="#"><i class="fas fa-file-invoice"></i> Member Statement</a>
-              <a href="#"><i class="fas fa-chart-line"></i> Account Summary</a>
             {% else %}
               <a href="{% url 'members:register' %}"><i class="fas fa-user-plus"></i> Register Member</a>
               <a href="{% url 'members:list' %}"><i class="fas fa-address-book"></i> Members List</a>
-              <a href="#"><i class="fas fa-file-lines"></i> Statements</a>
+              
             {% endif %}
           </div>
         </div>
@@ -115,8 +140,6 @@
           </div>
         </div>
 
-        
-
         <div class="dropdown">
           <button class="dropbtn"><i class="fas fa-cog"></i> Settings <i class="fas fa-chevron-down small-icon"></i></button>
           <div class="dropdown-content">
@@ -137,7 +160,9 @@
     <div class="nav-right">
       {% if user.is_authenticated %}
         <a href="{% url 'core:dashboard' %}" class="nav-link">Dashboard</a>
-        <a href="{% url 'accounts:logout' %}" class="logout-btn">Logout</a>
+        <a href="{% url 'accounts:logout' %}?next={% url 'core:landing' %}" class="logout-btn">
+    <i class="fa-solid fa-right-from-bracket"></i> Logout
+</a>
       {% else %}
         <a href="{% url 'accounts:login' %}" class="nav-link">Login</a>
         <a href="{% url 'accounts:signup' %}" class="btn">Sign Up</a>
@@ -150,7 +175,7 @@
       <div class="messages">
         {% for message in messages %}
           <div class="alert {{ message.tags }}">
-            <i class="fas fa-bell"></i> 
+            <i class="fas {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-exclamation{% else %}fa-bell{% endif %}"></i> 
             <span>{{ message }}</span>
           </div>
         {% endfor %}

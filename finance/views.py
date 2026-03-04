@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import models
+from django.db import models, transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -29,6 +29,33 @@ def get_or_create_account(code: str, name: str, account_type: str = "INCOME"):
         defaults={"name": name, "account_type": account_type}
     )
     return acct
+
+
+@transaction.atomic
+def record_transaction(account_code, amount, entry_type, narration, user=None):
+    """
+    Core utility to record data in the ledger and update account balance.
+    This ensures no data is missed across the system.
+    """
+    account = SaccoAccount.objects.select_for_update().get(code=account_code)
+    
+    # Create the ledger entry
+    entry = SaccoLedgerEntry.objects.create(
+        account=account,
+        amount=amount,
+        entry_type=entry_type,
+        narration=narration,
+        created_by=user
+    )
+    
+    # Update the running balance
+    if entry_type == "CREDIT":
+        account.balance += amount
+    else:
+        account.balance -= amount
+    
+    account.save()
+    return entry
 
 
 def sum_today_for_account(account: SaccoAccount):
@@ -147,9 +174,6 @@ def ledger(request):
 def fees_report(request):
     """
     Fees report = income breakdown (today or by date range)
-    GET:
-      - start=YYYY-MM-DD
-      - end=YYYY-MM-DD
     """
     start = request.GET.get("start")
     end = request.GET.get("end")
